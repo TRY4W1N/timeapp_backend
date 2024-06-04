@@ -1,6 +1,8 @@
 import uuid
 from typing import Protocol
-from dishka import provide, make_container, Provider, Scope
+from dishka import AsyncContainer, provide, make_container, Provider, Scope
+from src.infrastructure.database.mongodb.database import DatabaseMongo
+
 
 # Protocols
 class Session(Protocol):
@@ -17,6 +19,7 @@ class UserService(Protocol):
 
 
 # Implements
+
 
 class SessionMongo(Session):
 
@@ -37,7 +40,9 @@ class UserServiceMongo(UserService):
     def do_something(self) -> str:
         return f"User(uuid={self.uuid}) on Session({self.session.uuid})"
 
+
 # Provider
+
 
 class ServiceProvider(Provider):
 
@@ -73,3 +78,15 @@ def test_simple():
         print(service.do_something())
         service = rc.get(UserService)
         print(service.do_something())
+
+
+# pytest src/tests/test_dishka.py::test_mongo_client -v -s
+async def test_mongo_client(di: AsyncContainer):
+    print()
+    async with di() as container:
+        database = await container.get(DatabaseMongo)
+        user_collection, bobik_collection = database.get_collections("User", "Bobik")
+        result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
+        print(result)
+        result = await bobik_collection.insert_one(dict(name="user", desc="aboba"))
+        print(result)
