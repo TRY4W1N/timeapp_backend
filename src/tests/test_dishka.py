@@ -84,6 +84,25 @@ def test_simple():
 async def test_mongo_client(di: AsyncContainer):
     print()
     async with di() as container:
+        print("*" * 77)
+        database = await container.get(DatabaseMongo)
+        user_collection, bobik_collection = database.get_collections("User", "Bobik")
+        result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
+        print(result)
+        result = await bobik_collection.insert_one(dict(name="user", desc="aboba"))
+        print(result)
+
+        print("*" * 77)
+
+        database = await container.get(DatabaseMongo)
+        result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
+        print(result)
+        result = await bobik_collection.insert_one(dict(name="user", desc="aboba"))
+        print(result)
+
+    print("*" * 77)
+
+    async with di() as container:
         database = await container.get(DatabaseMongo)
         user_collection, bobik_collection = database.get_collections("User", "Bobik")
         result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
