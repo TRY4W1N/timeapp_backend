@@ -1,8 +1,9 @@
 from dataclasses import asdict, dataclass
 
+
 @dataclass
 class Model:
-    
+
     def to_dict(self) -> dict:
         return asdict(self)
 

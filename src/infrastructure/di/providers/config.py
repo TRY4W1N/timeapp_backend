@@ -1,4 +1,5 @@
 from dishka import Provider, Scope, provide
+
 from src.infrastructure.di.config import Config
 
 

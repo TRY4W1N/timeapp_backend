@@ -1,11 +1,14 @@
 from src.domain.ctx.category.dto import CategoryAddDTO
 from src.domain.ctx.category.entity import CategoryEntity
 from src.domain.ctx.category.interface.gateway import CategoryGateway
-from src.infrastructure.database.mongodb.gateways.base import GatewayBaseImp, MongoCollectionType
+from src.infrastructure.database.mongodb.gateways.base import (
+    GatewayMongoBase,
+    MongoCollectionType,
+)
 from src.infrastructure.database.mongodb.models import CategoryModel
 
 
-class CategoryGatewayImp(GatewayBaseImp, CategoryGateway):
+class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
 
     def __init__(self, collection: MongoCollectionType) -> None:
         self.collection = collection
@@ -33,5 +36,5 @@ class CategoryGatewayImp(GatewayBaseImp, CategoryGateway):
             icon=created_model_dict["icon"],
             icon_color=created_model_dict["icon_color"],
             position=created_model_dict["position"],
-            on_track=False
+            on_track=False,
         )
