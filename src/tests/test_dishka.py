@@ -1,6 +1,10 @@
 import uuid
 from typing import Protocol
-from dishka import AsyncContainer, provide, make_container, Provider, Scope
+
+from dishka import AsyncContainer, Provider, Scope, make_container, provide
+
+from src.domain.ctx.category.dto import CategoryAddDTO
+from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.infrastructure.database.mongodb.database import DatabaseMongo
 
 
@@ -85,8 +89,9 @@ async def test_mongo_client(di: AsyncContainer):
     print()
     async with di() as container:
         print("*" * 77)
-        database = await container.get(DatabaseMongo)
+        database = await container.get(DatabaseMongo, component="DATABASE")
         user_collection, bobik_collection = database.get_collections("User", "Bobik")
+        print(user_collection.full_name)
         result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
         print(result)
         result = await bobik_collection.insert_one(dict(name="user", desc="aboba"))
@@ -94,7 +99,7 @@ async def test_mongo_client(di: AsyncContainer):
 
         print("*" * 77)
 
-        database = await container.get(DatabaseMongo)
+        database = await container.get(DatabaseMongo, component="DATABASE")
         result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
         print(result)
         result = await bobik_collection.insert_one(dict(name="user", desc="aboba"))
@@ -103,9 +108,23 @@ async def test_mongo_client(di: AsyncContainer):
     print("*" * 77)
 
     async with di() as container:
-        database = await container.get(DatabaseMongo)
+        database = await container.get(DatabaseMongo, component="DATABASE")
         user_collection, bobik_collection = database.get_collections("User", "Bobik")
         result = await user_collection.insert_one(dict(name="bobik", desc="dodik"))
         print(result)
         result = await bobik_collection.insert_one(dict(name="user", desc="aboba"))
+        print(result)
+
+
+# pytest src/tests/test_dishka.py::test_get_gateway -v -s
+async def test_get_gateway(di: AsyncContainer):
+    print()
+    print()
+    async with di() as container:
+        print("*" * 77)
+        gateway = await container.get(CategoryGateway, component="GATEWAY")
+        print(gateway)
+        result = await gateway.add(
+            user_uuid="1337", obj=CategoryAddDTO(name="aboba", icon="simple", icon_color="hex1337", position=0)
+        )
         print(result)
