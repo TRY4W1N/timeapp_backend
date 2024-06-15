@@ -1,6 +1,6 @@
 from typing import Protocol
-from motor.motor_asyncio import AsyncIOMotorDatabase
-from motor.motor_asyncio import AsyncIOMotorCollection
+
+from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorDatabase
 
 from src.infrastructure.database.exception import CollectionNotFound
 
@@ -17,9 +17,7 @@ class DatabaseMongo(Protocol):
 
 class DatabaseMongoImplement:
 
-    def __init__(
-        self, database: AsyncIOMotorDatabase, allow_collection: list[str]
-    ) -> None:
+    def __init__(self, database: AsyncIOMotorDatabase, allow_collection: list[str]) -> None:
         self._database = database
         self._allow_collection = allow_collection
 
@@ -29,9 +27,7 @@ class DatabaseMongoImplement:
 
     def get_collection(self, name: str) -> AsyncIOMotorCollection:
         if name not in self._allow_collection:
-            raise CollectionNotFound(
-                f"`{name}` not in allow collection: {self.allow_collection}"
-            )
+            raise CollectionNotFound(f"`{name}` not in allow collection: {self.allow_collection}")
         return self._database[name]
 
     def get_collections(self, *names: str) -> tuple[AsyncIOMotorCollection, ...]:
