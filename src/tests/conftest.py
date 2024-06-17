@@ -1,3 +1,4 @@
+import asyncio
 from collections.abc import AsyncGenerator
 
 import pytest
@@ -11,11 +12,23 @@ from src.tests.dataloader import Dataloader
 
 
 @pytest.fixture(scope="session")
+def event_loop():
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="session")
 async def dicon() -> AsyncGenerator[AsyncContainer, None]:
     container = build_container()
-    async with container() as _container:
-        yield _container
-    await container.close()
+    try:
+        async with container() as _container:
+            yield _container
+    finally:
+        await container.close()
 
 
 @pytest.fixture(scope="function")

@@ -1,5 +1,7 @@
 # Timeapp
 
+Run tests: `make testlocal`
+
 ## Develop
 
 Env file:

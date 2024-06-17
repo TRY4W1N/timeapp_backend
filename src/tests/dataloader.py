@@ -155,6 +155,7 @@ class Dataloader:
 
     async def __aexit__(self, exc_type, exc, tb):
         await self._delete_created_all()
+        return
 
     async def _delete_created_all(self):
         for collection in self._database._get_collection_all():
