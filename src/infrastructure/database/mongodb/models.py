@@ -9,6 +9,13 @@ class Model:
 
 
 @dataclass
+class UserModel(Model):
+    uuid: str
+    name: str
+    email: str
+
+
+@dataclass
 class CategoryModel(Model):
     uuid: str
     user_uuid: str

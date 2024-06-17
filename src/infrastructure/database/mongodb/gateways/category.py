@@ -8,6 +8,19 @@ from src.infrastructure.database.mongodb.gateways.base import (
 from src.infrastructure.database.mongodb.models import CategoryModel
 
 
+def build_category_entity_after_add(data: dict) -> CategoryEntity:
+    return CategoryEntity(
+        uuid=data["uuid"],
+        user_uuid=data["user_uuid"],
+        name=data["name"],
+        disabled=data["disabled"],
+        icon=data["icon"],
+        icon_color=data["icon_color"],
+        position=data["position"],
+        on_track=False,
+    )
+
+
 class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
 
     def __init__(self, collection: MongoCollectionType) -> None:
@@ -28,13 +41,4 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         if created_model is None:
             raise Exception("Fail")
         created_model_dict = dict(**created_model)
-        return CategoryEntity(
-            uuid=created_model_dict["uuid"],
-            user_uuid=created_model_dict["user_uuid"],
-            name=created_model_dict["name"],
-            disabled=created_model_dict["disabled"],
-            icon=created_model_dict["icon"],
-            icon_color=created_model_dict["icon_color"],
-            position=created_model_dict["position"],
-            on_track=False,
-        )
+        return build_category_entity_after_add(created_model_dict)
