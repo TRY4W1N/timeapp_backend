@@ -12,3 +12,7 @@ class DomainError(BaseError):
 
 class AuthError(DomainError):
     """"""
+
+
+class EntityNotFound(DomainError):
+    """"""

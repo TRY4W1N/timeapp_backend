@@ -1,6 +1,6 @@
 import os
 
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 from pydantic import field_validator
 
 
@@ -12,8 +12,7 @@ class Settings(BaseSettings):
     FIREBASE_SECRET_PATH: str
     FIREBASE_APP_NAME: str
 
-    class Config:
-        env_file = ".env"
+    model_config = SettingsConfigDict(env_file='.env')
 
     @field_validator("CONFIGURE_JSON_PATH")
     def conf_json_path_exist(cls, v: str) -> str:
@@ -25,22 +24,19 @@ class Settings(BaseSettings):
 class SettingsDev(Settings):
     CONFIGURE_JSON_PATH: str = "develop.json"
 
-    class Config:
-        env_file = "dev.env"
+    model_config = SettingsConfigDict(env_file = "dev.env")
 
 
 class SettingsTest(Settings):
     CONFIGURE_JSON_PATH: str = "test.json"
 
-    class Config:
-        env_file = "test.env"
+    model_config = SettingsConfigDict(env_file = "test.env")
 
 
 class SettingsProd(Settings):
     CONFIGURE_JSON_PATH: str = "prod.json"
 
-    class Config:
-        env_file = "prod.env"
+    model_config = SettingsConfigDict(env_file = "prod.env")
 
 
 config = dict(dev=SettingsDev, test=SettingsTest, prod=SettingsProd)

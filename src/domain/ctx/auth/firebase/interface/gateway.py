@@ -10,7 +10,11 @@ class IFirebaseApplication(ABC):
         ...
 
     @abstractmethod
-    def setup(self):
+    def is_setup(self) -> bool:
+        ...
+
+    @abstractmethod
+    def setup(self) -> None:
         ...
 
     @abstractmethod

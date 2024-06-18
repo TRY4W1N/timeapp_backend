@@ -23,6 +23,11 @@ class FirebaseApplication(IFirebaseApplication):
     @property
     def name(self) -> str:
         return self._name
+    
+    @property
+    def is_setup(self) -> bool:
+        return self._is_setup
+
 
     def _get_provider_by_data(self, data: list[ProviderUserInfo]) -> ProviderIdentity:
         provider_data_list = data
@@ -83,7 +88,7 @@ class FirebaseApplication(IFirebaseApplication):
         )
         return user_obj
 
-    def setup(self):
+    def setup(self) -> None:
         if not self._is_setup:
             credential = firebase_admin.credentials.Certificate(self._secret_path)
             try:

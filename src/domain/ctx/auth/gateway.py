@@ -1,10 +1,10 @@
 from src.domain.ctx.auth.dto import UserIdentity
 from src.domain.ctx.auth.firebase.interface.gateway import IFirebaseApplication
-from src.domain.ctx.auth.interface.auth_provider_interface import IAuthProviderGateway
+from src.domain.ctx.auth.interface.auth_provider_interface import IAuthGateway
 from src.domain.exeption.base import AuthError
 
 
-class AuthGateway(IAuthProviderGateway):
+class AuthGateway(IAuthGateway):
     def __init__(self, firebase_app: IFirebaseApplication) -> None:
         self._fb_app = firebase_app
 

@@ -1,17 +1,33 @@
 from dishka import Provider, Scope, provide
 
-from src.domain.ctx.auth.dto import UserIdentity
-from src.domain.exeption.base import AuthError
-from src.infrastructure.di.alias import AuthType
+from src.application.settings import settings
+from src.domain.ctx.auth.firebase.application import FirebaseApplication, FirebaseApplicationSingleton
+from src.domain.ctx.auth.firebase.interface.gateway import IFirebaseApplication
+from src.domain.ctx.auth.gateway import AuthGateway
+from src.domain.ctx.auth.interface.auth_provider_interface import IAuthGateway
 
 
-class ServiceProvider(Provider):
+class AppServiceProvider(Provider):
+    component = "AUTH"
+
+    @provide(scope=Scope.APP)
+    async def get_auth_provider(
+        self,
+    ) -> IAuthGateway:
+        firebase_app = FirebaseApplicationSingleton(
+            name=settings.FIREBASE_APP_NAME, secret_path=settings.FIREBASE_SECRET_PATH
+        )
+        firebase_app.setup()
+        return AuthGateway(firebase_app=firebase_app)
+
+    @provide(scope=Scope.APP)
+    async def get_firebase_app_singleton(
+        self,
+    ) -> FirebaseApplicationSingleton:
+        return FirebaseApplicationSingleton(name=settings.FIREBASE_APP_NAME, secret_path=settings.FIREBASE_SECRET_PATH)
 
     @provide(scope=Scope.REQUEST)
-    async def get_user(self, auth: AuthType, database: DatabaseMongoType,  token: str, check_revoked) -> UserIdentity:
-        try:
-            user_identify = await auth.get_user_by_token(token=token, check_revoked=check_revoked)
-        except Exception as e:
-            raise AuthError(msg=f"User not found by token: {e}") from e
-
-        return user
+    async def get_firebase_app(
+        self,
+    ) -> IFirebaseApplication:
+        return FirebaseApplication(name=settings.FIREBASE_APP_NAME, secret_path=settings.FIREBASE_SECRET_PATH)
