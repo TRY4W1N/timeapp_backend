@@ -2,6 +2,7 @@ from dishka import Provider, Scope, from_context, provide
 from fastapi import Request
 
 from src.domain.ctx.user.entity import UserEntity
+from src.domain.ctx.user.interface.types import UserId
 from src.infrastructure.di.alias import UserToken
 
 
@@ -17,4 +18,4 @@ class RequestProvider(Provider):
     @provide(scope=Scope.REQUEST)
     async def get_user(self, token: UserToken) -> UserEntity:
         print(f"Token={token}, but ignored..")
-        return UserEntity(uuid="not_uuid", name="jayse", email="aboba@gmail.com")
+        return UserEntity(uuid=UserId("not_uuid"), name="jayse", email="aboba@gmail.com")

@@ -1,15 +1,15 @@
-from src.domain.ctx.category.dto import CategoryAddDTO
+from src.domain.ctx.category.dto import CategoryCreateDTO
 from src.domain.ctx.user.entity import UserEntity
-from src.domain.usecases.category.add import UsecaseCategoryAdd
+from src.domain.usecases.category.create import UsecaseCategoryCreate
 from src.tests.dataloader import Dataloader
 
 
-# pytest src/tests/usecase/category/test_add.py::test_add -v -s
-async def test_add(dl: Dataloader, fx_user: UserEntity, usecase_category_add: UsecaseCategoryAdd):
+# pytest src/tests/usecase/category/test_create.py::test_ok -v -s
+async def test_ok(dl: Dataloader, fx_user: UserEntity, usecase_category_create: UsecaseCategoryCreate):
     print()
 
     # Arrange
-    uc = usecase_category_add
+    uc = usecase_category_create
     name = "Test Category"
     icon = "Test Icon"
     icon_color = "Test Icon Color"
@@ -17,7 +17,7 @@ async def test_add(dl: Dataloader, fx_user: UserEntity, usecase_category_add: Us
 
     # Act
     result = await uc.execute(
-        user=fx_user, obj=CategoryAddDTO(name=name, icon=icon, icon_color=icon_color, position=position)
+        user=fx_user, obj=CategoryCreateDTO(name=name, icon=icon, icon_color=icon_color, position=position)
     )
 
     # Assert
