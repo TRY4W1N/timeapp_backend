@@ -1,14 +1,19 @@
-from typing import Annotated
-
-from pydantic import Field, PlainSerializer
+from pydantic import Field
 from pydantic_settings import BaseSettings, SettingsConfigDict
-
-ListStr = Annotated[str, PlainSerializer(lambda x: x.split(","), return_type=list)]
 
 
 class Config(BaseSettings):
+    APP_HOST: str = "127.0.0.1"
+    APP_PORT: int = 8000
+    APP_NAME: str = "TimeApp"
+    DEBUG: bool = Field(default=False)
 
     MONGODB_URL: str = "mongodb://127.0.0.1?retryWrites=true&w=majority"
     MONGODB_DATABASE: str = "timeappdb"
-    MONGODB_COLLECTION_LIST: ListStr = Field(default_factory=list)
+    MONGODB_COLLECTION_USER: str = Field(default="User")
+    MONGODB_COLLECTION_CATEGORY: str = Field(default="Category")
+    MONGODB_COLLECTION_INTERVAL: str = Field(default="Interval")
+    MONGODB_COLLECTION_TIMEDAY: str = Field(default="TimeDay")
+    MONGODB_COLLECTION_TIMEALL: str = Field(default="TimeAll")
+
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")

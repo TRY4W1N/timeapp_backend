@@ -1,4 +1,3 @@
-import typing
 from collections.abc import AsyncIterable
 
 import motor.motor_asyncio
@@ -17,7 +16,6 @@ class DatabaseProvider(Provider):
 
     @provide(scope=Scope.APP)
     async def get_client(self, config: ConfigType) -> AsyncIterable[AsyncIOMotorClient]:
-        print("Mongo client build!")
         client = motor.motor_asyncio.AsyncIOMotorClient(config.MONGODB_URL)
         try:
             yield client
@@ -28,9 +26,14 @@ class DatabaseProvider(Provider):
     async def get_database(
         self, client: AsyncIOMotorClient, config: ConfigType
     ) -> AsyncIterable[DatabaseMongoImplement]:
-        print("Mongo database build!")
         database = client.get_database(name=config.MONGODB_DATABASE)
-        allow_collection = typing.cast(list[str], config.MONGODB_COLLECTION_LIST)
+        allow_collection = [
+            config.MONGODB_COLLECTION_USER,
+            config.MONGODB_COLLECTION_CATEGORY,
+            config.MONGODB_COLLECTION_TIMEDAY,
+            config.MONGODB_COLLECTION_TIMEALL,
+            config.MONGODB_COLLECTION_INTERVAL,
+        ]
         yield DatabaseMongoImplement(database=database, allow_collection=allow_collection)
 
     @provide(scope=Scope.REQUEST)
@@ -38,6 +41,4 @@ class DatabaseProvider(Provider):
         self, client: AsyncIOMotorClient, database: DatabaseMongoImplement
     ) -> AsyncIterable[DatabaseMongo]:
         async with await client.start_session():
-            print("Start session")
             yield database
-        print("Session is close")

@@ -5,15 +5,14 @@ from firebase_admin import App, auth
 from firebase_admin._user_mgt import ProviderUserInfo, UserRecord
 from src.domain.ctx.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
 from src.domain.ctx.auth.enum import AuthProviderEnum
-from src.domain.ctx.auth.firebase.interface.gateway import IFirebaseApplication
-from src.utils import singleton
+from src.domain.ctx.auth.firebase.interface.gateway import IFirebaseApplicationGateway
 
 
 class FirebaseError(Exception):
     """"""
 
 
-class FirebaseApplication(IFirebaseApplication):
+class FirebaseApplicationGateway(IFirebaseApplicationGateway):
     def __init__(self, name: str, secret_path: str) -> None:
         self._name = name
         self._secret_path = secret_path
@@ -98,7 +97,3 @@ class FirebaseApplication(IFirebaseApplication):
                 self._app = firebase_admin.get_app(name=self.name)
         self._is_setup = True
 
-
-@singleton
-class FirebaseApplicationSingleton(FirebaseApplication):
-    ...
