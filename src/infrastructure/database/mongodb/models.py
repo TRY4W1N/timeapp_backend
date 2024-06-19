@@ -62,3 +62,21 @@ class CategoryModel(Model):
             icon_color=data["icon_color"],
             position=data["position"],
         )
+
+@dataclass
+class IntervalModel(Model):
+    uuid: str
+    user_uuid: str
+    category_uuid: str
+    started_at: int
+    end_at: int | None
+    
+    @classmethod
+    def from_dict(cls, data: dict) -> "IntervalModel":
+        return IntervalModel(
+            uuid=data["uuid"],
+            user_uuid=data["user_uuid"],
+            category_uuid=data["category_uuid"],
+            started_at=data["started_at"],
+            end_at=data["end_at"],
+        )

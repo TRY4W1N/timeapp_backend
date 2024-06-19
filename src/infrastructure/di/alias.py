@@ -5,13 +5,13 @@ from dishka import FromComponent
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
 from src.domain.ctx.user.entity import UserEntity
-from src.domain.usecases.category.clear import UsecaseCategoryClear
 from src.domain.usecases.category.create import UsecaseCategoryCreate
 from src.domain.usecases.category.delete import UsecaseCategoryDelete
 from src.domain.usecases.category.get_list import UsecaseCategoryGetList
-from src.domain.usecases.category.track_start import UsecaseCategoryTrackStart
-from src.domain.usecases.category.track_stop import UsecaseCategoryTrackStop
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
+from src.domain.usecases.interval.clear import UsecaseIntervalClear
+from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
+from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
 from src.infrastructure.config import Config
 from src.infrastructure.database.mongodb.database import DatabaseMongo
 
@@ -31,10 +31,6 @@ UsecaseCategoryCreateType = Annotated[
     UsecaseCategoryCreate,
     FromComponent("USECASE"),
 ]
-UsecaseCategoryClearType = Annotated[
-    UsecaseCategoryClear,
-    FromComponent("USECASE"),
-]
 UsecaseCategoryUpdateType = Annotated[
     UsecaseCategoryUpdate,
     FromComponent("USECASE"),
@@ -47,11 +43,15 @@ UsecaseCategoryGetListType = Annotated[
     UsecaseCategoryGetList,
     FromComponent("USECASE"),
 ]
-UsecaseCategoryTrackStartType = Annotated[
-    UsecaseCategoryTrackStart,
+UsecaseIntervalClearType = Annotated[
+    UsecaseIntervalClear,
     FromComponent("USECASE"),
 ]
-UsecaseCategoryTrackStopType = Annotated[
-    UsecaseCategoryTrackStop,
+UsecaseIntervalTrackStartType = Annotated[
+    UsecaseIntervalTrackStart,
+    FromComponent("USECASE"),
+]
+UsecaseIntervalTrackStopType = Annotated[
+    UsecaseIntervalTrackStop,
     FromComponent("USECASE"),
 ]

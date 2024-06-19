@@ -2,6 +2,7 @@ from dataclasses import dataclass
 
 from src.domain.common.dto.unset import UnsetDTO
 from src.domain.common.types.unset import UNSET, UnsetType
+from src.domain.ctx.category.interface.types import CategoryId
 
 
 @dataclass
@@ -24,3 +25,8 @@ class CategoryUpdateDTO(UnsetDTO):
 @dataclass
 class CategoryFilterDTO(UnsetDTO):
     name__like: str | UnsetType = UNSET
+
+@dataclass
+class CategoryDeleteDTO:
+    category_uuid: CategoryId
+    interval_count: int

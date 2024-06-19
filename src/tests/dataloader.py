@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from datetime import datetime
 from typing import Generic, TypeVar
 from uuid import uuid4
 
@@ -6,19 +7,22 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 
 from src.infrastructure.config import Config
 from src.infrastructure.database.mongodb.database import DatabaseMongo
-from src.infrastructure.database.mongodb.models import CategoryModel, UserModel
+from src.infrastructure.database.mongodb.models import CategoryModel, IntervalModel, UserModel
 
 T = TypeVar("T")
 
 uuid_gen = lambda: str(uuid4())
 user_uuid_gen = lambda: f"user_{uuid_gen()}"
 category_uuid_gen = lambda: f"category_{uuid_gen()}"
+interval_uuid_gen = lambda: f"interval_{uuid_gen()}"
 
 
 class EntityLoader(ABC, Generic[T]):
 
-    def __init__(self, collection: AsyncIOMotorCollection) -> None:
-        self.collection = collection
+    def __init__(self, collection: AsyncIOMotorCollection, database: DatabaseMongo, config: Config) -> None:
+        self._collection = collection
+        self._database = database
+        self._config = config
 
     @abstractmethod
     async def create(self) -> T: ...
@@ -27,7 +31,7 @@ class EntityLoader(ABC, Generic[T]):
         raise NotImplementedError()
 
     async def _get(self, fltr: dict) -> dict:
-        return await self.collection.find_one(fltr)  # type: ignore
+        return await self._collection.find_one(fltr)  # type: ignore
 
 
 class UserLoader(EntityLoader[UserModel]):
@@ -44,7 +48,7 @@ class UserLoader(EntityLoader[UserModel]):
             name = uuid_gen()
         if email is None:
             email = uuid_gen()
-        insert_result = await self.collection.insert_one(
+        insert_result = await self._collection.insert_one(
             dict(
                 uuid=uuid,
                 name=name,
@@ -52,7 +56,7 @@ class UserLoader(EntityLoader[UserModel]):
             )
         )
         assert insert_result.acknowledged
-        created_model = await self.collection.find_one(filter={"_id": insert_result.inserted_id})
+        created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
         if created_model is None:
             raise Exception("Fail")
         data = dict(**created_model)
@@ -71,6 +75,46 @@ class UserLoader(EntityLoader[UserModel]):
         )
 
 
+class IntervalLoader(EntityLoader[IntervalModel]):
+
+    async def create(
+        self,
+        user_uuid: str,
+        category_uuid: str,
+        uuid: str | None = None,
+        started_at: int | None = None,
+        end_at: int | None = None,
+    ) -> IntervalModel:
+        if uuid is None:
+            uuid = interval_uuid_gen()
+        if started_at is None:
+            started_at = int(datetime.now().timestamp())
+        insert_result = await self._collection.insert_one(
+            IntervalModel(
+                uuid=uuid,
+                user_uuid=user_uuid,
+                category_uuid=category_uuid,
+                started_at=started_at,
+                end_at=end_at,
+            ).to_dict()
+        )
+        assert insert_result.acknowledged
+        created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
+        if created_model is None:
+            raise Exception("Fail")
+        model = IntervalModel.from_dict(dict(**created_model))
+        return model
+
+    async def get(self, fltr: dict) -> IntervalModel:
+        data = await self._get(fltr=fltr)
+        return IntervalModel.from_dict(data)
+    
+    async def get_lst(self, fltr: dict) -> list[IntervalModel]:
+        data = self._collection.find(fltr)
+        models = await data.to_list(length=None)
+        return [IntervalModel.from_dict(dict(**model)) for model in models]
+
+
 class CategoryLoader(EntityLoader[CategoryModel]):
 
     async def create(
@@ -82,8 +126,6 @@ class CategoryLoader(EntityLoader[CategoryModel]):
         icon_color: str | None = None,
         position: int = 0,
         active: bool = True,
-        track_status__active: bool = False,
-        track_status__started_at: bool = False,
     ) -> CategoryModel:
         if uuid is None:
             uuid = category_uuid_gen()
@@ -95,7 +137,7 @@ class CategoryLoader(EntityLoader[CategoryModel]):
             icon = uuid_gen()
         if icon_color is None:
             icon_color = uuid_gen()
-        insert_result = await self.collection.insert_one(
+        insert_result = await self._collection.insert_one(
             CategoryModel(
                 uuid=uuid,
                 user_uuid=user_uuid,
@@ -107,11 +149,11 @@ class CategoryLoader(EntityLoader[CategoryModel]):
             ).to_dict()
         )
         assert insert_result.acknowledged
-        created_model = await self.collection.find_one(filter={"_id": insert_result.inserted_id})
+        created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
         if created_model is None:
             raise Exception("Fail")
-        data = dict(**created_model)
-        return CategoryModel.from_dict(data)
+        model = CategoryModel.from_dict(dict(**created_model))
+        return model
 
     async def get(self, fltr: dict) -> CategoryModel:
         data = await self._get(fltr=fltr)
@@ -125,14 +167,19 @@ class Dataloader:
         self._config = config
 
     @property
+    def interval_loader(self) -> IntervalLoader:
+        collection = self._database.get_collection(name=self._config.MONGODB_COLLECTION_INTERVAL)
+        return IntervalLoader(collection=collection, database=self._database, config=self._config)
+
+    @property
     def category_loader(self) -> CategoryLoader:
         collection = self._database.get_collection(name=self._config.MONGODB_COLLECTION_CATEGORY)
-        return CategoryLoader(collection=collection)
+        return CategoryLoader(collection=collection, database=self._database, config=self._config)
 
     @property
     def user_loader(self) -> UserLoader:
         collection = self._database.get_collection(name=self._config.MONGODB_COLLECTION_USER)
-        return UserLoader(collection=collection)
+        return UserLoader(collection=collection, database=self._database, config=self._config)
 
     async def __aenter__(self):
         print()

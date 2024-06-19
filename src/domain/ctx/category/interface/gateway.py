@@ -2,6 +2,7 @@ from abc import ABC, abstractmethod
 
 from src.domain.ctx.category.dto import (
     CategoryCreateDTO,
+    CategoryDeleteDTO,
     CategoryFilterDTO,
     CategoryUpdateDTO,
 )
@@ -19,7 +20,7 @@ class CategoryGateway(ABC):
     async def update(self, user_uuid: UserId, category_uuid: CategoryId, obj: CategoryUpdateDTO) -> CategoryEntity: ...
 
     @abstractmethod
-    async def delete(self, user_uuid: UserId, category_uuid: CategoryId) -> CategoryId: ...
+    async def delete(self, user_uuid: UserId, category_uuid: CategoryId) -> CategoryDeleteDTO: ...
 
     @abstractmethod
     async def lst(self, user_uuid: UserId, obj: CategoryFilterDTO) -> list[CategoryEntity]: ...

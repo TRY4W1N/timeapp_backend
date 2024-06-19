@@ -4,23 +4,16 @@ from fastapi import APIRouter, Depends
 
 from src.domain.ctx.category.dto import (
     CategoryCreateDTO,
+    CategoryDeleteDTO,
     CategoryFilterDTO,
     CategoryUpdateDTO,
 )
 from src.domain.ctx.category.entity import CategoryEntity
 from src.domain.ctx.category.interface.types import CategoryId
-from src.domain.ctx.interval.dto import (
-    IntervalClearDTO,
-    IntervalStartDTO,
-    IntervalStopDTO,
-)
 from src.infrastructure.di.alias import (
-    UsecaseCategoryClearType,
     UsecaseCategoryCreateType,
     UsecaseCategoryDeleteType,
     UsecaseCategoryGetListType,
-    UsecaseCategoryTrackStartType,
-    UsecaseCategoryTrackStopType,
     UsecaseCategoryUpdateType,
     UserEntityType,
 )
@@ -59,41 +52,11 @@ async def category_update(
     return result
 
 
-@category_router.delete("/clear/{uuid}")
-async def category_clear(
-    user: FromDishka[UserEntityType],
-    uc: FromDishka[UsecaseCategoryClearType],
-    uuid: CategoryId,
-) -> IntervalClearDTO:
-    result = await uc.execute(user=user, category_uuid=uuid)
-    return result
-
-
 @category_router.delete("/delete/{uuid}")
 async def category_delete(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseCategoryDeleteType],
     uuid: CategoryId,
-) -> CategoryId:
-    result = await uc.execute(user=user, category_uuid=uuid)
-    return result
-
-
-@category_router.post("/track/start/{uuid}")
-async def category_track_start(
-    user: FromDishka[UserEntityType],
-    uc: FromDishka[UsecaseCategoryTrackStartType],
-    uuid: CategoryId,
-) -> IntervalStartDTO:
-    result = await uc.execute(user=user, category_uuid=uuid)
-    return result
-
-
-@category_router.post("/track/stop/{uuid}")
-async def category_track_stop(
-    user: FromDishka[UserEntityType],
-    uc: FromDishka[UsecaseCategoryTrackStopType],
-    uuid: CategoryId,
-) -> IntervalStopDTO:
+) -> CategoryDeleteDTO:
     result = await uc.execute(user=user, category_uuid=uuid)
     return result

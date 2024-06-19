@@ -2,13 +2,13 @@ from collections.abc import AsyncIterable
 
 from dishka import Provider, Scope, provide
 
-from src.domain.usecases.category.clear import UsecaseCategoryClear
 from src.domain.usecases.category.create import UsecaseCategoryCreate
 from src.domain.usecases.category.delete import UsecaseCategoryDelete
 from src.domain.usecases.category.get_list import UsecaseCategoryGetList
-from src.domain.usecases.category.track_start import UsecaseCategoryTrackStart
-from src.domain.usecases.category.track_stop import UsecaseCategoryTrackStop
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
+from src.domain.usecases.interval.clear import UsecaseIntervalClear
+from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
+from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
 from src.infrastructure.di.alias import GatewayCategoryType, GatewayIntervalType
 
 
@@ -37,11 +37,11 @@ class UsecaseProvider(Provider):
         yield UsecaseCategoryUpdate(category_gateway=gateway)
 
     @provide(scope=Scope.REQUEST)
-    async def get_category_clear(
+    async def get_interval_clear(
         self,
         gateway: GatewayIntervalType,
-    ) -> AsyncIterable[UsecaseCategoryClear]:
-        yield UsecaseCategoryClear(interval_gateway=gateway)
+    ) -> AsyncIterable[UsecaseIntervalClear]:
+        yield UsecaseIntervalClear(interval_gateway=gateway)
 
     @provide(scope=Scope.REQUEST)
     async def get_category_get_list(
@@ -51,15 +51,15 @@ class UsecaseProvider(Provider):
         yield UsecaseCategoryGetList(category_gateway=gateway)
 
     @provide(scope=Scope.REQUEST)
-    async def get_category_track_start(
+    async def get_interval_track_start(
         self,
         gateway: GatewayIntervalType,
-    ) -> AsyncIterable[UsecaseCategoryTrackStart]:
-        yield UsecaseCategoryTrackStart(interval_gateway=gateway)
+    ) -> AsyncIterable[UsecaseIntervalTrackStart]:
+        yield UsecaseIntervalTrackStart(interval_gateway=gateway)
 
     @provide(scope=Scope.REQUEST)
-    async def get_category_track_stop(
+    async def get_interval_track_stop(
         self,
         gateway: GatewayIntervalType,
-    ) -> AsyncIterable[UsecaseCategoryTrackStop]:
-        yield UsecaseCategoryTrackStop(interval_gateway=gateway)
+    ) -> AsyncIterable[UsecaseIntervalTrackStop]:
+        yield UsecaseIntervalTrackStop(interval_gateway=gateway)
