@@ -81,7 +81,9 @@ class CategoryLoader(EntityLoader[CategoryModel]):
         icon: str | None = None,
         icon_color: str | None = None,
         position: int = 0,
-        disabled: bool = False,
+        active: bool = True,
+        track_status__active: bool = False,
+        track_status__started_at: bool = False,
     ) -> CategoryModel:
         if uuid is None:
             uuid = category_uuid_gen()
@@ -94,42 +96,26 @@ class CategoryLoader(EntityLoader[CategoryModel]):
         if icon_color is None:
             icon_color = uuid_gen()
         insert_result = await self.collection.insert_one(
-            dict(
+            CategoryModel(
                 uuid=uuid,
                 user_uuid=user_uuid,
                 name=name,
                 icon=icon,
                 icon_color=icon_color,
                 position=position,
-                disabled=disabled,
-            )
+                active=active,
+            ).to_dict()
         )
         assert insert_result.acknowledged
         created_model = await self.collection.find_one(filter={"_id": insert_result.inserted_id})
         if created_model is None:
             raise Exception("Fail")
         data = dict(**created_model)
-        return CategoryModel(
-            uuid=data["uuid"],
-            user_uuid=data["user_uuid"],
-            name=data["name"],
-            disabled=data["disabled"],
-            icon=data["icon"],
-            icon_color=data["icon_color"],
-            position=data["position"],
-        )
+        return CategoryModel.from_dict(data)
 
     async def get(self, fltr: dict) -> CategoryModel:
         data = await self._get(fltr=fltr)
-        return CategoryModel(
-            uuid=data["uuid"],
-            user_uuid=data["user_uuid"],
-            name=data["name"],
-            disabled=data["disabled"],
-            icon=data["icon"],
-            icon_color=data["icon_color"],
-            position=data["position"],
-        )
+        return CategoryModel.from_dict(data)
 
 
 class Dataloader:

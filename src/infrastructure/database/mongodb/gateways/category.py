@@ -3,34 +3,48 @@ from src.domain.ctx.category.dto import (
     CategoryFilterDTO,
     CategoryUpdateDTO,
 )
-from src.domain.ctx.category.entity import CategoryEntity
+from src.domain.ctx.category.entity import CategoryEntity, CategoryTrackInfo
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.category.interface.types import CategoryId
+from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.interface.types import UserId
 from src.infrastructure.database.mongodb.gateways.base import (
     GatewayMongoBase,
     MongoCollectionType,
 )
-from src.infrastructure.database.mongodb.models import CategoryModel
+from src.infrastructure.database.mongodb.models import CategoryModel, CategoryTrackInfoSubModel
 
 
-def build_category_entity_after_create(data: dict) -> CategoryEntity:
+def build_category_entity(model: CategoryModel, track_info: CategoryTrackInfoSubModel) -> CategoryEntity:
+    track_info__interval_uuid = None
+    if track_info.interval_uuid is not None:
+        track_info__interval_uuid = IntervalId(track_info.interval_uuid)
     return CategoryEntity(
-        uuid=data["uuid"],
-        user_uuid=data["user_uuid"],
-        name=data["name"],
-        disabled=data["disabled"],
-        icon=data["icon"],
-        icon_color=data["icon_color"],
-        position=data["position"],
-        on_track=False,
+        uuid=CategoryId(model.uuid),
+        user_uuid=UserId(model.user_uuid),
+        name=model.name,
+        active=model.active,
+        icon=model.icon,
+        icon_color=model.icon_color,
+        position=model.position,
+        track_info=CategoryTrackInfo(
+            category_uuid=CategoryId(track_info.category_uuid),
+            active=track_info.active,
+            started_at=track_info.started_at,
+            interval_uuid=track_info__interval_uuid,
+        ),
     )
 
 
 class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
 
-    def __init__(self, collection: MongoCollectionType) -> None:
-        self.collection = collection
+    def __init__(
+        self,
+        category_collection: MongoCollectionType,
+        interval_collection: MongoCollectionType,
+    ) -> None:
+        self.category_collection = category_collection
+        self.interval_collection = interval_collection
 
     async def create(self, user_uuid: UserId, obj: CategoryCreateDTO) -> CategoryEntity:
         model = CategoryModel(
@@ -41,13 +55,18 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
             icon_color=obj.icon_color,
             position=obj.position,
         )
-        insert_result = await self.collection.insert_one(model.to_dict())
+        insert_result = await self.category_collection.insert_one(model.to_dict())
         assert insert_result.acknowledged
-        created_model = await self.collection.find_one(filter={"_id": insert_result.inserted_id})
+        created_model = await self.category_collection.find_one(filter={"_id": insert_result.inserted_id})
         if created_model is None:
             raise Exception("Fail")
-        created_model_dict = dict(**created_model)
-        return build_category_entity_after_create(created_model_dict)
+        created_model = CategoryModel.from_dict(dict(**created_model))
+        return build_category_entity(
+            model=created_model,
+            track_info=CategoryTrackInfoSubModel(
+                category_uuid=created_model.uuid, active=False, started_at=None, interval_uuid=None
+            ),
+        )
 
     async def update(self, user_uuid: UserId, category_uuid: CategoryId, obj: CategoryUpdateDTO) -> CategoryEntity:
         return await super().update(user_uuid, category_uuid, obj)  # type: ignore

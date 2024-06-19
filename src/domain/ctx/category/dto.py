@@ -16,6 +16,7 @@ class CategoryCreateDTO:
 class CategoryUpdateDTO(UnsetDTO):
     name: str | UnsetType = UNSET
     icon: str | UnsetType = UNSET
+    active: bool | UnsetType = UNSET
     icon_color: str | UnsetType = UNSET
     position: int | UnsetType = UNSET
 
