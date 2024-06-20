@@ -14,6 +14,8 @@ class DatabaseMongo(Protocol):
 
     def get_collections(self, *names: str) -> tuple[AsyncIOMotorCollection, ...]: ...
 
+    def _get_collection_all(self) -> tuple[AsyncIOMotorCollection, ...]: ...
+
 
 class DatabaseMongoImplement:
 
@@ -32,3 +34,6 @@ class DatabaseMongoImplement:
 
     def get_collections(self, *names: str) -> tuple[AsyncIOMotorCollection, ...]:
         return tuple(self.get_collection(name) for name in names)
+
+    def _get_collection_all(self) -> tuple[AsyncIOMotorCollection, ...]:
+        return tuple([self._database[name] for name in self._allow_collection])

@@ -6,20 +6,20 @@ from src.domain.ctx.user.interface.types import UserId
 
 
 @dataclass
-class CategoryTrackInfo:
+class IntervalStartDTO:
+    user_uuid: UserId
     category_uuid: CategoryId
-    active: bool
-    started_at: int | None
-    interval_uuid: IntervalId | None
+    interval_uuid: IntervalId
 
 
 @dataclass
-class CategoryEntity:
-    uuid: CategoryId
+class IntervalStopDTO:
     user_uuid: UserId
-    name: str
-    active: bool
-    icon: str
-    icon_color: str
-    position: int
-    track_info: CategoryTrackInfo
+    category_uuid: CategoryId
+    interval_uuid: IntervalId
+
+
+@dataclass
+class IntervalClearDTO:
+    user_uuid: UserId
+    category_uuid: CategoryId

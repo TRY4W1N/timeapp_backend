@@ -2,7 +2,6 @@ from dishka import Provider, Scope, provide
 
 from src.application.settings import settings
 from src.domain.ctx.auth.firebase.application import FirebaseApplicationGateway
-from src.domain.ctx.auth.firebase.interface.gateway import IFirebaseApplicationGateway
 from src.domain.ctx.auth.gateway import AuthGateway
 from src.domain.ctx.auth.interface.auth_provider_gateway import IAuthGateway
 
@@ -19,9 +18,3 @@ class AppServiceProvider(Provider):
         )
         firebase_app.setup()
         return AuthGateway(firebase_app=firebase_app)
-
-    @provide(scope=Scope.REQUEST)
-    async def get_firebase_app(
-        self,
-    ) -> IFirebaseApplicationGateway:
-        return FirebaseApplicationGateway(name=settings.FIREBASE_APP_NAME, secret_path=settings.FIREBASE_SECRET_PATH)
