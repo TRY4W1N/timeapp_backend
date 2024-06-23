@@ -1,10 +1,9 @@
 from unittest.mock import Mock
-import pytest
 
-from dishka import Provider, Scope, make_async_container, provide
+from dishka import Provider, Scope, provide
 
-from src.domain.ctx.auth.dto import TokenIdentity
-from src.domain.ctx.auth.interface.gateway import AuthGateway
+from src.application.service.auth.dto import TokenIdentity
+from src.application.service.auth.interface.gateway import AuthGateway
 from src.infrastructure.auth.gateway.auth import AuthGatewayFirebase
 from src.infrastructure.auth.gateway.firebase import FirebaseGatewayImplement
 

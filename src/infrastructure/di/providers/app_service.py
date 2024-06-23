@@ -1,6 +1,6 @@
 from dishka import Provider, Scope, provide
 
-from src.domain.ctx.auth.interface.gateway import AuthGateway
+from src.application.service.auth.interface.gateway import AuthGateway
 from src.infrastructure.auth.gateway.auth import AuthGatewayFirebase
 from src.infrastructure.auth.gateway.firebase import FirebaseGatewayImplement
 from src.infrastructure.di.alias import ConfigType

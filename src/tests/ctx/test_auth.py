@@ -1,7 +1,7 @@
 from dishka import AsyncContainer
 import pytest
 
-from src.domain.ctx.auth.interface.gateway import AuthGateway
+from src.application.service.auth.interface.gateway import AuthGateway
 from src.domain.exception.base import AuthError
 from src.tests.conftest import mock_app_service_container
 
