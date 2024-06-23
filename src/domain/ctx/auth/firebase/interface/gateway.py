@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from src.domain.ctx.auth.dto import TokenIdentity, UserIdentity
 
 
-class IFirebaseApplicationGateway(ABC):
+class FirebaseGateway(ABC):
     @property
     @abstractmethod
     def name(self) -> str:

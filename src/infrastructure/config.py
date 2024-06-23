@@ -7,6 +7,7 @@ class Config(BaseSettings):
     APP_PORT: int = 8000
     APP_NAME: str = "TimeApp"
     DEBUG: bool = Field(default=False)
+    FIREBASE_SECRET_PATH: str = Field(default=False)
 
     MONGODB_URL: str = "mongodb://127.0.0.1?retryWrites=true&w=majority"
     MONGODB_DATABASE: str = "timeappdb"

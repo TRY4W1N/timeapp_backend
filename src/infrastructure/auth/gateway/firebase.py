@@ -5,14 +5,14 @@ from firebase_admin import App, auth
 from firebase_admin._user_mgt import ProviderUserInfo, UserRecord
 from src.domain.ctx.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
 from src.domain.ctx.auth.enum import AuthProviderEnum
-from src.domain.ctx.auth.firebase.interface.gateway import IFirebaseApplicationGateway
+from src.domain.ctx.auth.firebase.interface.gateway import FirebaseGateway
 
 
 class FirebaseError(Exception):
     """"""
 
 
-class FirebaseApplicationGateway(IFirebaseApplicationGateway):
+class FirebaseGatewayImplement(FirebaseGateway):
     def __init__(self, name: str, secret_path: str) -> None:
         self._name = name
         self._secret_path = secret_path
