@@ -1,13 +1,52 @@
+import asyncio
 from collections.abc import AsyncGenerator
 
-import pytest_asyncio
-from dishka import AsyncContainer
+import pytest
+from dishka import AsyncContainer, make_async_container
 
+from src.domain.ctx.category.interface.gateway import CategoryGateway
+from src.infrastructure.config import Config
+from src.infrastructure.database.mongodb.database import DatabaseMongo
 from src.infrastructure.di.container import build_container
+from src.tests.dataloader import Dataloader
+from src.tests.fixtures.auth.app_service import MockAppServiceProvider
 
 
-@pytest_asyncio.fixture(scope="session")
-async def di() -> AsyncGenerator[AsyncContainer, None]:
+@pytest.fixture(scope="session")
+def event_loop():
+    try:
+        loop = asyncio.get_running_loop()
+    except RuntimeError:
+        loop = asyncio.new_event_loop()
+    yield loop
+    loop.close()
+
+
+@pytest.fixture(scope="session")
+async def dicon() -> AsyncGenerator[AsyncContainer, None]:
     container = build_container()
+    try:
+        async with container() as _container:
+            yield _container
+    finally:
+        await container.close()
+
+
+@pytest.fixture(scope="function")
+async def dl(dicon: AsyncContainer) -> AsyncGenerator[Dataloader, None]:
+    database = await dicon.get(DatabaseMongo, component="DATABASE")
+    config = await dicon.get(Config, component="CONFIG")
+    async with Dataloader(database=database, config=config) as _dl:
+        yield _dl
+
+
+@pytest.fixture(scope="function")
+async def gateway_category(dicon: AsyncContainer) -> AsyncGenerator[CategoryGateway, None]:
+    yield await dicon.get(CategoryGateway, component="GATEWAY")
+
+
+@pytest.fixture(scope="function")
+async def mock_app_service_container():
+    container = make_async_container(MockAppServiceProvider())
     yield container
     await container.close()
