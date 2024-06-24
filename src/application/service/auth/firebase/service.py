@@ -3,44 +3,36 @@ import asyncio
 import firebase_admin
 from firebase_admin import App, auth
 from firebase_admin._user_mgt import ProviderUserInfo, UserRecord
+from src.application.service.auth.firebase.dto import (
+    ProviderIdentity,
+    TokenIdentity,
+    UserIdentity,
+)
+from src.application.service.auth.firebase.enum import AuthProviderEnum
+from src.application.service.auth.firebase.exception import FirebaseError
+from src.domain.ctx.auth.dto import UserIdentityDTO
+from src.domain.ctx.auth.interface.service import AuthService
+from src.domain.exception.base import AuthError
 
-from src.application.service.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
-from src.application.service.auth.enum import AuthProviderEnum
-from src.application.service.auth.firebase.interface.gateway import FirebaseGateway
 
+class AuthServiceFirebase(AuthService):
 
-class FirebaseError(Exception):
-    """"""
-
-
-class FirebaseGatewayImplement(FirebaseGateway):
     def __init__(self, name: str, secret_path: str) -> None:
         self._name = name
         self._secret_path = secret_path
         self._is_setup = False
         self._app: App | None = None
 
-    @property
-    def name(self) -> str:
-        return self._name
-    
-    @property
-    def is_setup(self) -> bool:
-        return self._is_setup
+    def setup(self) -> None:
+        if not self._is_setup:
+            credential = firebase_admin.credentials.Certificate(self._secret_path)
+            try:
+                self._app = firebase_admin.initialize_app(credential=credential, name=self._name)
+            except ValueError:
+                self._app = firebase_admin.get_app(name=self._name)
+        self._is_setup = True
 
-
-    def _get_provider_by_data(self, data: list[ProviderUserInfo]) -> ProviderIdentity:
-        provider_data_list = data
-        if len(provider_data_list) != 1:
-            raise FirebaseError(f"Can't processing parse provider data size != 1: size={len(provider_data_list)}")
-        provider_data = provider_data_list[0]
-        if provider_data.provider_id == "google.com":
-            _type = AuthProviderEnum.GOOGLE
-        else:
-            raise FirebaseError(f"Can't processing parse provider data: unknown provider `{provider_data.provider_id}`")
-        return ProviderIdentity(type=_type, data=provider_data._data)
-
-    async def verify_token(self, token: str, check_revoked: bool = True) -> TokenIdentity:
+    async def _verify_token(self, token: str, check_revoked: bool = True) -> TokenIdentity:
         if not self._is_setup:
             raise FirebaseError("Not setup")
         loop = asyncio.get_running_loop()
@@ -71,7 +63,7 @@ class FirebaseGatewayImplement(FirebaseGateway):
         )
         return token_obj
 
-    async def get_user(self, id: str) -> UserIdentity:
+    async def _get_user(self, id: str) -> UserIdentity:
         if not self._is_setup:
             raise FirebaseError("Not setup")
         loop = asyncio.get_running_loop()
@@ -88,13 +80,24 @@ class FirebaseGatewayImplement(FirebaseGateway):
         )
         return user_obj
 
-    def setup(self) -> None:
-        if not self._is_setup:
-            credential = firebase_admin.credentials.Certificate(self._secret_path)
-            try:
-                # That create app in global firebase_admin scope..
-                self._app = firebase_admin.initialize_app(credential=credential, name=self._name)
-            except ValueError:
-                self._app = firebase_admin.get_app(name=self.name)
-        self._is_setup = True
+    def _get_provider_by_data(self, data: list[ProviderUserInfo]) -> ProviderIdentity:
+        provider_data_list = data
+        if len(provider_data_list) != 1:
+            raise FirebaseError(f"Can't processing parse provider data size != 1: size={len(provider_data_list)}")
+        provider_data = provider_data_list[0]
+        if provider_data.provider_id == "google.com":
+            _type = AuthProviderEnum.GOOGLE
+        else:
+            raise FirebaseError(f"Can't processing parse provider data: unknown provider `{provider_data.provider_id}`")
+        return ProviderIdentity(type=_type, data=provider_data._data)
 
+    async def get_by_token(self, token: str) -> UserIdentityDTO:
+        try:
+            token_identity = await self._verify_token(token=token, check_revoked=True)
+        except Exception as e:
+            raise AuthError(msg=f"Error on verify token: {e}") from e
+        try:
+            user_identity = await self._get_user(id=token_identity.user_id)
+        except Exception as e:
+            raise AuthError(msg=f"Error on get user by id={token_identity.user_id}: {e}") from e
+        return UserIdentityDTO(id=user_identity.id, name=user_identity.name, email=user_identity.email)

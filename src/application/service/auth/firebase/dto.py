@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 
-from src.application.service.auth.enum import AuthProviderEnum
-
+from src.application.service.auth.firebase.enum import AuthProviderEnum
 
 
 @dataclass
