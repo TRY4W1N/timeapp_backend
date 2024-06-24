@@ -41,6 +41,7 @@ class UserLoader(EntityLoader[UserModel]):
         uuid: str | None = None,
         name: str | None = None,
         email: str | None = None,
+        utc: str | None = None,
     ) -> UserModel:
         if uuid is None:
             uuid = user_uuid_gen()
@@ -48,11 +49,14 @@ class UserLoader(EntityLoader[UserModel]):
             name = uuid_gen()
         if email is None:
             email = uuid_gen()
+        if utc is None:
+            utc = "Europe/Prague"
         insert_result = await self._collection.insert_one(
             dict(
                 uuid=uuid,
                 name=name,
                 email=email,
+                utc=utc,
             )
         )
         assert insert_result.acknowledged
@@ -64,6 +68,7 @@ class UserLoader(EntityLoader[UserModel]):
             uuid=data["uuid"],
             name=data["name"],
             email=data["email"],
+            utc=data["utc"]
         )
 
     async def get(self, fltr: dict) -> UserModel:
@@ -72,6 +77,7 @@ class UserLoader(EntityLoader[UserModel]):
             uuid=data["uuid"],
             name=data["name"],
             email=data["email"],
+            utc=data["utc"]
         )
 
 

@@ -3,9 +3,10 @@ import asyncio
 import firebase_admin
 from firebase_admin import App, auth
 from firebase_admin._user_mgt import ProviderUserInfo, UserRecord
-from src.domain.ctx.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
-from src.domain.ctx.auth.enum import AuthProviderEnum
-from src.domain.ctx.auth.firebase.interface.gateway import FirebaseGateway
+
+from src.application.service.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
+from src.application.service.auth.enum import AuthProviderEnum
+from src.application.service.auth.firebase.interface.gateway import FirebaseGateway
 
 
 class FirebaseError(Exception):
