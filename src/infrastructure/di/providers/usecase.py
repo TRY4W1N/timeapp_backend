@@ -9,11 +9,25 @@ from src.domain.usecases.category.update import UsecaseCategoryUpdate
 from src.domain.usecases.interval.clear import UsecaseIntervalClear
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
-from src.infrastructure.di.alias import GatewayCategoryType, GatewayIntervalType
+from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
+from src.infrastructure.di.alias import (
+    GatewayCategoryType,
+    GatewayIntervalType,
+    GatewayUserType,
+    ServiceAuthType,
+)
 
 
 class UsecaseProvider(Provider):
     component = "USECASE"
+
+    @provide(scope=Scope.REQUEST)
+    async def get_user_get_by_token(
+        self,
+        auth_service: ServiceAuthType,
+        gateway: GatewayUserType,
+    ) -> AsyncIterable[UsecaseUserGetByToken]:
+        yield UsecaseUserGetByToken(auth_service=auth_service, user_gateway=gateway)
 
     @provide(scope=Scope.REQUEST)
     async def get_category_create(

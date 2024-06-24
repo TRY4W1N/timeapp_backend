@@ -63,6 +63,7 @@ class CategoryModel(Model):
             position=data["position"],
         )
 
+
 @dataclass
 class IntervalModel(Model):
     uuid: str
@@ -70,7 +71,7 @@ class IntervalModel(Model):
     category_uuid: str
     started_at: int
     end_at: int | None
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> "IntervalModel":
         return IntervalModel(

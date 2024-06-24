@@ -7,7 +7,11 @@ from motor.motor_asyncio import AsyncIOMotorCollection
 
 from src.infrastructure.config import Config
 from src.infrastructure.database.mongodb.database import DatabaseMongo
-from src.infrastructure.database.mongodb.models import CategoryModel, IntervalModel, UserModel
+from src.infrastructure.database.mongodb.models import (
+    CategoryModel,
+    IntervalModel,
+    UserModel,
+)
 
 T = TypeVar("T")
 
@@ -108,7 +112,7 @@ class IntervalLoader(EntityLoader[IntervalModel]):
     async def get(self, fltr: dict) -> IntervalModel:
         data = await self._get(fltr=fltr)
         return IntervalModel.from_dict(data)
-    
+
     async def get_lst(self, fltr: dict) -> list[IntervalModel]:
         data = self._collection.find(fltr)
         models = await data.to_list(length=None)

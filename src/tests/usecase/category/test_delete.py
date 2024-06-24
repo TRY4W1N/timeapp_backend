@@ -13,7 +13,7 @@ async def test_ok(dl: Dataloader, fx_user: UserEntity, usecase_category_delete: 
     uc = usecase_category_delete
     category_model = await dl.category_loader.create(user_uuid=fx_user.uuid)
     interval_fltr = {"user_uuid": fx_user.uuid, "category_uuid": category_model.uuid}
-    
+
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
 

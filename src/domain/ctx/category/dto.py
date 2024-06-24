@@ -26,6 +26,7 @@ class CategoryUpdateDTO(UnsetDTO):
 class CategoryFilterDTO(UnsetDTO):
     name__like: str | UnsetType = UNSET
 
+
 @dataclass
 class CategoryDeleteDTO:
     category_uuid: CategoryId
