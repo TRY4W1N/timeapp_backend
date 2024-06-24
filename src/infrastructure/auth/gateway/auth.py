@@ -1,6 +1,6 @@
-from src.domain.ctx.auth.dto import UserIdentity
-from src.domain.ctx.auth.firebase.interface.gateway import FirebaseGateway
-from src.domain.ctx.auth.interface.gateway import AuthGateway
+from src.application.service.auth.dto import UserIdentity
+from src.application.service.auth.firebase.interface.gateway import FirebaseGateway
+from src.application.service.auth.interface.gateway import AuthGateway
 from src.domain.exception.base import AuthError
 
 
