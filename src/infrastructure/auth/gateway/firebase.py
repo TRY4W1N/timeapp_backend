@@ -3,9 +3,10 @@ import asyncio
 import firebase_admin
 from firebase_admin import App, auth
 from firebase_admin._user_mgt import ProviderUserInfo, UserRecord
-from src.domain.ctx.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
-from src.domain.ctx.auth.enum import AuthProviderEnum
-from src.domain.ctx.auth.firebase.interface.gateway import FirebaseGateway
+
+from src.application.service.auth.dto import ProviderIdentity, TokenIdentity, UserIdentity
+from src.application.service.auth.enum import AuthProviderEnum
+from src.application.service.auth.firebase.interface.gateway import FirebaseGateway
 
 
 class FirebaseError(Exception):
@@ -22,11 +23,10 @@ class FirebaseGatewayImplement(FirebaseGateway):
     @property
     def name(self) -> str:
         return self._name
-    
+
     @property
     def is_setup(self) -> bool:
         return self._is_setup
-
 
     def _get_provider_by_data(self, data: list[ProviderUserInfo]) -> ProviderIdentity:
         provider_data_list = data
@@ -96,4 +96,3 @@ class FirebaseGatewayImplement(FirebaseGateway):
             except ValueError:
                 self._app = firebase_admin.get_app(name=self.name)
         self._is_setup = True
-
