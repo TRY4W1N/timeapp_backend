@@ -40,3 +40,7 @@ testlocal:
 .PHONY: run
 run:
 	python -m src.presentation.http.app
+
+.PHONY: devapp
+devapp:
+	docker compose -f docker-compose.yaml up --build -d

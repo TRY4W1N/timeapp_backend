@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Config(BaseSettings):
-    APP_HOST: str = "127.0.0.1"
+    APP_HOST: str = "0.0.0.0"
     APP_PORT: int = 8000
     APP_NAME: str = "TimeApp"
     DEBUG: bool = Field(default=False)

@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: .
+      target: app
+    ports:
+      - "8000:8000"
+    command: make run
+    depends_on:
+      - mongodb
+    networks:
+      - time_app
+  
+  mongodb:
+    image: mongo:latest
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: timeapp
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: timeappdb
+      MONGODB_COLLECTION_USER: ${MONGODB_COLLECTION_USER}
+      MONGODB_COLLECTION_CATEGORY: ${MONGODB_COLLECTION_CATEGORY}
+      MONGODB_COLLECTION_INTERVAL: ${MONGODB_COLLECTION_INTERVAL}
+      MONGODB_COLLECTION_TIMEDAY: ${MONGODB_COLLECTION_TIMEDAY}
+      MONGODB_COLLECTION_TIMEALL: ${MONGODB_COLLECTION_TIMEALL}
+    ports:
+      - "27017:27017"
+    volumes:
+      - ./infra/docker/init_mongo.js:/docker-entrypoint-initdb.d/init_mongo.js:ro
+      # - mongodb-data:/data/db
+      - mongodb-logs:/var/log/mongodb/
+    networks:
+      - time_app
+    
+
+volumes:
+  mongodb-data:
+    driver: local
+    name: mongo-data
+  mongodb-logs:
+    driver: local
+    name: mongo-logs
+
+networks:
+  time_app: {}
