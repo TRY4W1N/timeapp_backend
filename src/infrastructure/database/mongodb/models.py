@@ -25,17 +25,15 @@ class UserModel(Model):
 
 
 @dataclass
-class CategoryTrackInfoSubModel(Model):
+class CategoryTrackCurrentSubModel(Model):
     category_uuid: str
-    active: bool
-    started_at: int | None
-    interval_uuid: str | None
+    interval_uuid: str
+    started_at: int
 
     @classmethod
-    def from_dict(cls, data: dict) -> "CategoryTrackInfoSubModel":
-        return CategoryTrackInfoSubModel(
+    def from_dict(cls, data: dict) -> "CategoryTrackCurrentSubModel":
+        return CategoryTrackCurrentSubModel(
             category_uuid=data["category_uuid"],
-            active=data["active"],
             started_at=data["started_at"],
             interval_uuid=data["interval_uuid"],
         )

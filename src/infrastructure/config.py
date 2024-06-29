@@ -17,4 +17,4 @@ class Config(BaseSettings):
     MONGODB_COLLECTION_TIMEDAY: str = Field(default="TimeDay")
     MONGODB_COLLECTION_TIMEALL: str = Field(default="TimeAll")
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="forbid")
