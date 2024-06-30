@@ -1,10 +1,3 @@
-print("ADSLDJKBASLKDJBALKSDJBALKSDJBAS");
-print();
-print();
-print();
-
-// var db = connect(process.env.MONGODB_URL);
-
 db = db.getSiblingDB(process.env.MONGO_INITDB_DATABASE);
 
 db.createUser({
@@ -26,4 +19,3 @@ db.createCollection(process.env.MONGODB_COLLECTION_INTERVAL);
 db.createCollection(process.env.MONGODB_COLLECTION_TIMEDAY);
 db.createCollection(process.env.MONGODB_COLLECTION_TIMEALL);
 
-print("ADSLDJKBASLKDJBALKSDJBALKSDJBAS");
