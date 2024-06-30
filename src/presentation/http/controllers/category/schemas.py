@@ -1,6 +1,5 @@
 from pydantic import BaseModel
 
-from src.domain.common.types.unset import UNSET, UnsetType
 from src.domain.ctx.category.dto import (
     CategoryCreateDTO,
     CategoryDeleteDTO,
@@ -8,13 +7,11 @@ from src.domain.ctx.category.dto import (
     CategoryUpdateDTO,
 )
 from src.domain.ctx.category.entity import CategoryEntity, CategoryTrackInfo
-from src.domain.ctx.category.interface.types import CategoryId
-from src.domain.ctx.user.interface.types import UserId
 
 
 class CategorySchema(BaseModel):
-    uuid: CategoryId
-    user_uuid: UserId
+    uuid: str
+    user_uuid: str
     name: str
     active: bool
     icon: str
@@ -36,25 +33,13 @@ class CategorySchema(BaseModel):
         )
 
 
-class CategorySListSchema(BaseModel):
+class CategoryListSchema(BaseModel):
     items: list[CategorySchema]
 
     @classmethod
-    def from_obj(cls, category_list: list[CategoryEntity]) -> "CategorySListSchema":
-        items = [
-            CategorySchema(
-                uuid=obj.uuid,
-                user_uuid=obj.user_uuid,
-                name=obj.name,
-                active=obj.active,
-                icon=obj.icon,
-                icon_color=obj.icon_color,
-                position=obj.position,
-                track_info=obj.track_info,
-            )
-            for obj in category_list
-        ]
-        return CategorySListSchema(items=items)
+    def from_obj(cls, category_list: list[CategoryEntity]) -> "CategoryListSchema":
+        items = [CategorySchema.from_obj(category_obj=obj) for obj in category_list]
+        return CategoryListSchema(items=items)
 
 
 class CategoryFilterSchema(BaseModel):
@@ -82,13 +67,11 @@ class CategoryUpdateSchema(BaseModel):
     position: int | None = None
 
     def to_obj(self) -> CategoryUpdateDTO:
-        return CategoryUpdateDTO(
-            **self.model_dump(exclude_unset=True)
-        )
+        return CategoryUpdateDTO(**self.model_dump(exclude_unset=True))
 
 
 class CategoryDeleteSchema(BaseModel):
-    category_uuid: CategoryId
+    category_uuid: str
     interval_count: int
 
     @classmethod
