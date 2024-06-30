@@ -1,6 +1,6 @@
-FROM python:3.10 as builder
+FROM python:3.11-slim-buster as builder
 
-RUN apt-get update && apt-get upgrade
+RUN apt-get update -y && apt-get upgrade -y
 
 WORKDIR /app
 
