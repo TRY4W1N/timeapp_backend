@@ -16,7 +16,7 @@ from src.presentation.http.controllers.category.schemas import (
     CategoryFilterSchema,
     CategorySchema,
     CategoryUpdateSchema,
-    ListCategorySchema,
+    CategorySListSchema,
 )
 
 category_router = APIRouter(route_class=DishkaRoute)
@@ -27,10 +27,10 @@ async def category_list(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseCategoryGetListType],
     obj: CategoryFilterSchema = Depends(),
-) -> ListCategorySchema:
+) -> CategorySListSchema:
     filter_obj = obj.to_obj()
     result = await uc.execute(user=user, obj=filter_obj)
-    return ListCategorySchema.from_obj(category_list=result)
+    return CategorySListSchema.from_obj(category_list=result)
 
 
 @category_router.post("/")

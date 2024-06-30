@@ -36,11 +36,11 @@ class CategorySchema(BaseModel):
         )
 
 
-class ListCategorySchema(BaseModel):
+class CategorySListSchema(BaseModel):
     items: list[CategorySchema]
 
     @classmethod
-    def from_obj(cls, category_list: list[CategoryEntity]) -> "ListCategorySchema":
+    def from_obj(cls, category_list: list[CategoryEntity]) -> "CategorySListSchema":
         items = [
             CategorySchema(
                 uuid=obj.uuid,
@@ -54,14 +54,14 @@ class ListCategorySchema(BaseModel):
             )
             for obj in category_list
         ]
-        return ListCategorySchema(items=items)
+        return CategorySListSchema(items=items)
 
 
 class CategoryFilterSchema(BaseModel):
-    name__like: str | UnsetType = UNSET
+    name__like: str | None = None
 
     def to_obj(self) -> CategoryFilterDTO:
-        return CategoryFilterDTO(name__like=self.name__like)
+        return CategoryFilterDTO(**self.model_dump(exclude_unset=True))
 
 
 class CategoryCreateSchema(BaseModel):
@@ -71,19 +71,19 @@ class CategoryCreateSchema(BaseModel):
     position: int
 
     def to_obj(self) -> CategoryCreateDTO:
-        return CategoryCreateDTO(name=self.name, icon=self.icon, icon_color=self.icon_color, position=self.position)
+        return CategoryCreateDTO(**self.model_dump(exclude_unset=True))
 
 
 class CategoryUpdateSchema(BaseModel):
-    name: str | UnsetType = UNSET
-    icon: str | UnsetType = UNSET
-    active: bool | UnsetType = UNSET
-    icon_color: str | UnsetType = UNSET
-    position: int | UnsetType = UNSET
+    name: str | None = None
+    icon: str | None = None
+    active: bool | None = None
+    icon_color: str | None = None
+    position: int | None = None
 
     def to_obj(self) -> CategoryUpdateDTO:
         return CategoryUpdateDTO(
-            name=self.name, icon=self.icon, active=self.active, icon_color=self.icon_color, position=self.position
+            **self.model_dump(exclude_unset=True)
         )
 
 
