@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Config(BaseSettings):
-    APP_HOST: str = "0.0.0.0"
+    APP_HOST: str = "127.0.0.1"
     APP_PORT: int = 8000
     APP_NAME: str = "TimeApp"
     DEBUG: bool = Field(default=False)
@@ -16,5 +16,11 @@ class Config(BaseSettings):
     MONGODB_COLLECTION_INTERVAL: str = Field(default="Interval")
     MONGODB_COLLECTION_TIMEDAY: str = Field(default="TimeDay")
     MONGODB_COLLECTION_TIMEALL: str = Field(default="TimeAll")
+
+    MONGO_INITDB_ROOT_USERNAME: str = Field(default="")
+    MONGO_INITDB_ROOT_PASSWORD: str = Field(default="")
+    MONGO_INITDB_DATABASE: str = Field(default="")
+    MONGODB_HOST: str = Field(default="")
+    MONGODB_PORT: str = Field(default="")
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
