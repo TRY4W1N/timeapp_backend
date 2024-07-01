@@ -9,7 +9,7 @@ from src.domain.ctx.auth.dto import UserIdentityDTO
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.types import UserId
-from src.infrastructure.config import Config
+from src.infrastructure.config import ConfigBase
 from src.infrastructure.database.mongodb.database import DatabaseMongo
 from src.infrastructure.di.container import build_container
 from src.tests.dataloader import Dataloader
@@ -38,7 +38,7 @@ async def dicon() -> AsyncGenerator[AsyncContainer, None]:
 @pytest.fixture(scope="function")
 async def dl(dicon: AsyncContainer) -> AsyncGenerator[Dataloader, None]:
     database = await dicon.get(DatabaseMongo, component="DATABASE")
-    config = await dicon.get(Config, component="CONFIG")
+    config = await dicon.get(ConfigBase, component="CONFIG")
     async with Dataloader(database=database, config=config) as _dl:
         yield _dl
 

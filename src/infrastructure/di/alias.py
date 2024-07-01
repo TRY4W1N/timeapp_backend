@@ -1,6 +1,7 @@
 from typing import Annotated, NewType
 
 from dishka import FromComponent
+from motor.motor_asyncio import AsyncIOMotorClient
 
 from src.domain.ctx.auth.interface.service import AuthService
 from src.domain.ctx.category.interface.gateway import CategoryGateway
@@ -15,14 +16,18 @@ from src.domain.usecases.interval.clear import UsecaseIntervalClear
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
 from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
-from src.infrastructure.config import Config
+from src.infrastructure.config import ConfigBase
 from src.infrastructure.database.mongodb.database import DatabaseMongo
 
 UserToken = NewType("UserToken", str)
 
 
 # Component types
-ConfigType = Annotated[Config, FromComponent("CONFIG")]
+ConfigType = Annotated[ConfigBase, FromComponent("CONFIG")]
+MongoClientType = Annotated[
+    AsyncIOMotorClient,
+    FromComponent("DATABASE"),
+]
 DatabaseMongoType = Annotated[DatabaseMongo, FromComponent("DATABASE")]
 UserTokenType = Annotated[UserToken, FromComponent("REQUEST")]
 UserEntityType = Annotated[UserEntity, FromComponent("REQUEST")]

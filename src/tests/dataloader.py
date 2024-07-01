@@ -5,7 +5,7 @@ from uuid import uuid4
 
 from motor.motor_asyncio import AsyncIOMotorCollection
 
-from src.infrastructure.config import Config
+from src.infrastructure.config import ConfigBase
 from src.infrastructure.database.mongodb.database import DatabaseMongo
 from src.infrastructure.database.mongodb.models import (
     CategoryModel,
@@ -23,7 +23,7 @@ interval_uuid_gen = lambda: f"interval_{uuid_gen()}"
 
 class EntityLoader(ABC, Generic[T]):
 
-    def __init__(self, collection: AsyncIOMotorCollection, database: DatabaseMongo, config: Config) -> None:
+    def __init__(self, collection: AsyncIOMotorCollection, database: DatabaseMongo, config: ConfigBase) -> None:
         self._collection = collection
         self._database = database
         self._config = config
@@ -166,7 +166,7 @@ class CategoryLoader(EntityLoader[CategoryModel]):
 
 class Dataloader:
 
-    def __init__(self, database: DatabaseMongo, config: Config) -> None:
+    def __init__(self, database: DatabaseMongo, config: ConfigBase) -> None:
         self._database = database
         self._config = config
 
