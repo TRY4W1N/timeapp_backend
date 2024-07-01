@@ -35,7 +35,10 @@ class EntityLoader(ABC, Generic[T]):
         raise NotImplementedError()
 
     async def _get(self, fltr: dict) -> dict:
-        return await self._collection.find_one(fltr)  # type: ignore
+        select = await self._collection.find_one(fltr)  # type: ignore
+        if select is None:
+            raise Exception(f"Not found {self.__class__.__name__} with fltr={fltr}")
+        return select
 
 
 class UserLoader(EntityLoader[UserModel]):

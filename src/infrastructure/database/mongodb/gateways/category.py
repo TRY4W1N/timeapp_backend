@@ -70,10 +70,11 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         return await super().update(user_uuid, category_uuid, obj)  # type: ignore
 
     async def delete(self, user_uuid: UserId, category_uuid: CategoryId) -> CategoryDeleteDTO:
-        fltr = {"user_uuid": user_uuid, "category_uuid": category_uuid}
-        category_delete_result = await self.category_collection.delete_many(fltr)
+        category_fltr = {"uuid": category_uuid}
+        category_delete_result = await self.category_collection.delete_one(category_fltr)
         assert category_delete_result.acknowledged
-        interval_delete_result = await self.interval_collection.delete_many(fltr)
+        interval_fltr = {"user_uuid": user_uuid, "category_uuid": category_uuid}
+        interval_delete_result = await self.interval_collection.delete_many(interval_fltr)
         assert interval_delete_result.acknowledged
         return CategoryDeleteDTO(category_uuid=category_uuid, interval_count=interval_delete_result.deleted_count)
 
