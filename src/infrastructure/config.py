@@ -21,7 +21,6 @@ class Config(BaseSettings):
     MONGODB_COLLECTION_TIMEALL: str = Field(default="TimeAll")
 
     DEV_USERS_JSON_PATH: str = Field(default="")
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 
     @field_validator("APP_ENV")
     @classmethod
@@ -35,3 +34,5 @@ class Config(BaseSettings):
         with open(self.DEV_USERS_JSON_PATH) as f:
             data = json.load(f)
         return data
+
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
