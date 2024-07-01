@@ -25,7 +25,7 @@ async def interval_track_start(
     category_uuid: CategoryId,
 ) -> IntervalStartSchema:
     result = await uc.execute(user=user, category_uuid=category_uuid)
-    return IntervalStartSchema.from_obj(interval_obj=result)
+    return IntervalStartSchema.from_obj(obj=result)
 
 
 @interval_router.post("/stop/{category_uuid}")
@@ -35,7 +35,7 @@ async def interval_track_stop(
     category_uuid: CategoryId,
 ) -> IntervalStopSchema:
     result = await uc.execute(user=user, category_uuid=category_uuid)
-    return IntervalStopSchema.from_obj(interval_obj=result)
+    return IntervalStopSchema.from_obj(obj=result)
 
 
 @interval_router.delete("/clear/{category_uuid}")
@@ -45,4 +45,4 @@ async def interval_clear_by_category(
     category_uuid: CategoryId,
 ) -> IntervalClearSchema:
     result = await uc.execute(user=user, category_uuid=category_uuid)
-    return IntervalClearSchema.from_obj(interval_obj=result)
+    return IntervalClearSchema.from_obj(obj=result)

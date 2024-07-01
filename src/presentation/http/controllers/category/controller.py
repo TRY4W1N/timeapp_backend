@@ -30,7 +30,7 @@ async def category_list(
 ) -> CategoryListSchema:
     filter_obj = obj.to_obj()
     result = await uc.execute(user=user, obj=filter_obj)
-    return CategoryListSchema.from_obj(category_list=result)
+    return CategoryListSchema.from_obj(obj_list=result)
 
 
 @category_router.post("/")
@@ -41,7 +41,7 @@ async def category_create(
 ) -> CategorySchema:
     obj = in_obj.to_obj()
     result = await uc.execute(user=user, obj=obj)
-    return CategorySchema.from_obj(category_obj=result)
+    return CategorySchema.from_obj(obj=result)
 
 
 @category_router.patch("/{uuid}")
@@ -53,7 +53,7 @@ async def category_update(
 ) -> CategorySchema:
     obj = in_obj.to_obj()
     result = await uc.execute(user=user, category_uuid=uuid, obj=obj)
-    return CategorySchema.from_obj(category_obj=result)
+    return CategorySchema.from_obj(obj=result)
 
 
 @category_router.delete("/delete/{uuid}")
@@ -63,4 +63,4 @@ async def category_delete(
     uuid: CategoryId,
 ) -> CategoryDeleteSchema:
     result = await uc.execute(user=user, category_uuid=uuid)
-    return CategoryDeleteSchema.from_obj(category_obj=result)
+    return CategoryDeleteSchema.from_obj(obj=result)

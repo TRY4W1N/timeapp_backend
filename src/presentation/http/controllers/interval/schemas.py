@@ -1,47 +1,44 @@
 from pydantic import BaseModel
 
-from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.dto import (
     IntervalClearDTO,
     IntervalStartDTO,
     IntervalStopDTO,
 )
-from src.domain.ctx.interval.interface.types import IntervalId
-from src.domain.ctx.user.interface.types import UserId
 
 
 class IntervalStartSchema(BaseModel):
-    user_uuid: UserId
-    category_uuid: CategoryId
-    interval_uuid: IntervalId
+    user_uuid: str
+    category_uuid: str
+    interval_uuid: str
 
     @classmethod
-    def from_obj(cls, interval_obj: IntervalStartDTO) -> "IntervalStartSchema":
+    def from_obj(cls, obj: IntervalStartDTO) -> "IntervalStartSchema":
         return IntervalStartSchema(
-            user_uuid=interval_obj.user_uuid,
-            category_uuid=interval_obj.category_uuid,
-            interval_uuid=interval_obj.interval_uuid,
+            user_uuid=obj.user_uuid,
+            category_uuid=obj.category_uuid,
+            interval_uuid=obj.interval_uuid,
         )
 
 
 class IntervalStopSchema(BaseModel):
-    user_uuid: UserId
-    category_uuid: CategoryId
-    interval_uuid: IntervalId
+    user_uuid: str
+    category_uuid: str
+    interval_uuid: str
 
     @classmethod
-    def from_obj(cls, interval_obj: IntervalStopDTO) -> "IntervalStopSchema":
+    def from_obj(cls, obj: IntervalStopDTO) -> "IntervalStopSchema":
         return IntervalStopSchema(
-            user_uuid=interval_obj.user_uuid,
-            category_uuid=interval_obj.category_uuid,
-            interval_uuid=interval_obj.interval_uuid,
+            user_uuid=obj.user_uuid,
+            category_uuid=obj.category_uuid,
+            interval_uuid=obj.interval_uuid,
         )
 
 
 class IntervalClearSchema(BaseModel):
-    user_uuid: UserId
-    category_uuid: CategoryId
+    user_uuid: str
+    category_uuid: str
 
     @classmethod
-    def from_obj(cls, interval_obj: IntervalClearDTO) -> "IntervalClearSchema":
-        return IntervalClearSchema(user_uuid=interval_obj.user_uuid, category_uuid=interval_obj.category_uuid)
+    def from_obj(cls, obj: IntervalClearDTO) -> "IntervalClearSchema":
+        return IntervalClearSchema(user_uuid=obj.user_uuid, category_uuid=obj.category_uuid)

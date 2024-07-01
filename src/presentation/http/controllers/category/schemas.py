@@ -1,3 +1,4 @@
+from typing import Union
 from pydantic import BaseModel
 
 from src.domain.ctx.category.dto import (
@@ -6,7 +7,23 @@ from src.domain.ctx.category.dto import (
     CategoryFilterDTO,
     CategoryUpdateDTO,
 )
-from src.domain.ctx.category.entity import CategoryEntity, CategoryTrackInfo
+from src.domain.ctx.category.entity import CategoryEntity, CategoryTrackCurrent
+
+
+class CategoryTrackCurrentSchema(BaseModel):
+    interval_uuid: str
+    category_uuid: str
+    started_at: int
+
+    @classmethod
+    def from_obj(cls, obj: CategoryTrackCurrent | None) -> Union["CategoryTrackCurrentSchema", None]:
+        if obj is None:
+            return None
+        return CategoryTrackCurrentSchema(
+            interval_uuid=obj.interval_uuid,
+            category_uuid=obj.category_uuid,
+            started_at=obj.started_at,
+        )
 
 
 class CategorySchema(BaseModel):
@@ -17,19 +34,19 @@ class CategorySchema(BaseModel):
     icon: str
     icon_color: str
     position: int
-    track_info: CategoryTrackInfo
+    track_current: CategoryTrackCurrentSchema | None
 
     @classmethod
-    def from_obj(cls, category_obj: CategoryEntity) -> "CategorySchema":
+    def from_obj(cls, obj: CategoryEntity) -> "CategorySchema":
         return CategorySchema(
-            user_uuid=category_obj.user_uuid,
-            uuid=category_obj.uuid,
-            name=category_obj.name,
-            active=category_obj.active,
-            icon=category_obj.icon,
-            icon_color=category_obj.icon_color,
-            position=category_obj.position,
-            track_info=category_obj.track_info,
+            user_uuid=obj.user_uuid,
+            uuid=obj.uuid,
+            name=obj.name,
+            active=obj.active,
+            icon=obj.icon,
+            icon_color=obj.icon_color,
+            position=obj.position,
+            track_current=CategoryTrackCurrentSchema.from_obj(obj=obj.track_current),
         )
 
 
@@ -37,8 +54,8 @@ class CategoryListSchema(BaseModel):
     items: list[CategorySchema]
 
     @classmethod
-    def from_obj(cls, category_list: list[CategoryEntity]) -> "CategoryListSchema":
-        items = [CategorySchema.from_obj(category_obj=obj) for obj in category_list]
+    def from_obj(cls, obj_list: list[CategoryEntity]) -> "CategoryListSchema":
+        items = [CategorySchema.from_obj(obj=obj) for obj in obj_list]
         return CategoryListSchema(items=items)
 
 
@@ -75,7 +92,7 @@ class CategoryDeleteSchema(BaseModel):
     interval_count: int
 
     @classmethod
-    def from_obj(cls, category_obj: CategoryDeleteDTO) -> "CategoryDeleteSchema":
+    def from_obj(cls, obj: CategoryDeleteDTO) -> "CategoryDeleteSchema":
         return CategoryDeleteSchema(
-            category_uuid=category_obj.category_uuid, interval_count=category_obj.interval_count
+            category_uuid=obj.category_uuid, interval_count=obj.interval_count
         )
