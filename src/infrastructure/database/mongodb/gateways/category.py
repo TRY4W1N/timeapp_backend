@@ -1,3 +1,5 @@
+import pymongo
+
 from src.domain.ctx.category.dto import (
     CategoryCreateDTO,
     CategoryDeleteDTO,
@@ -9,6 +11,7 @@ from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.interface.types import UserId
+from src.domain.exception.base import EntityNotCreated, EntityNotFound
 from src.infrastructure.database.mongodb.gateways.base import (
     GatewayMongoBase,
     MongoCollectionType,
@@ -62,21 +65,59 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         assert insert_result.acknowledged
         created_model = await self.category_collection.find_one(filter={"_id": insert_result.inserted_id})
         if created_model is None:
-            raise Exception("Fail")
+            raise EntityNotCreated(msg=f"Category not created for user_uuid={user_uuid} with data={obj}")
         created_model = CategoryModel.from_dict(dict(**created_model))
         return build_category_entity(model=created_model, track_current=None)
 
     async def update(self, user_uuid: UserId, category_uuid: CategoryId, obj: CategoryUpdateDTO) -> CategoryEntity:
-        return await super().update(user_uuid, category_uuid, obj)  # type: ignore
+        category_fltr = {"user_uuid": user_uuid, "uuid": category_uuid}
+        update_values = {"$set": {**obj.to_dict(exclude_unset=True)}}
+        update_result = await self.category_collection.find_one_and_update(
+            category_fltr, update_values, return_document=pymongo.ReturnDocument.AFTER
+        )
+        if update_result is None:
+            raise EntityNotFound(msg=f"Category not updated for user_uuid={user_uuid} with data={obj}")
+        category_updated_model = CategoryModel.from_dict(dict(**update_result))
+        interval_fltr = {
+            "user_uuid": user_uuid,
+            "category_uuid": category_uuid,
+            "started_at": {"$ne": None},
+            "end_at": {"$eq": None},
+        }
+        interval_data_query = self.interval_collection.aggregate(
+            pipeline=[
+                {
+                    "$match": interval_fltr,
+                },
+                {
+                    "$sort": {
+                        "started_at": pymongo.DESCENDING,
+                    },
+                },
+            ],
+            allowDiskUse=True,
+        )
+        interval_tmp_data = await interval_data_query.to_list(length=1)
+        interval_data = None
+        if len(interval_tmp_data) == 1:
+            interval_data = dict(**interval_tmp_data[0])
+        track_current_model = CategoryTrackCurrentSubModel.from_dict(interval_data)
+        return build_category_entity(model=category_updated_model, track_current=track_current_model)
 
     async def delete(self, user_uuid: UserId, category_uuid: CategoryId) -> CategoryDeleteDTO:
         category_fltr = {"uuid": category_uuid}
         category_delete_result = await self.category_collection.delete_one(category_fltr)
         assert category_delete_result.acknowledged
+        if category_delete_result.deleted_count == 0:
+            raise EntityNotFound(
+                msg=f"Category not deleted for user_uuid={user_uuid} and category_uuid={category_uuid}"
+            )
         interval_fltr = {"user_uuid": user_uuid, "category_uuid": category_uuid}
         interval_delete_result = await self.interval_collection.delete_many(interval_fltr)
         assert interval_delete_result.acknowledged
-        return CategoryDeleteDTO(category_uuid=category_uuid, interval_count=interval_delete_result.deleted_count)
+        return CategoryDeleteDTO(
+            user_uuid=user_uuid, category_uuid=category_uuid, interval_count=interval_delete_result.deleted_count
+        )
 
     async def lst(self, user_uuid: UserId, obj: CategoryFilterDTO) -> list[CategoryEntity]:
         return await super().lst(user_uuid, obj)  # type: ignore

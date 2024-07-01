@@ -29,7 +29,7 @@ class ConfigBase(BaseSettings):
     @classmethod
     def app_env_upper(cls, v: str) -> str:
         return v.upper()
-    
+
     @field_validator("ENV")
     @classmethod
     def env_upper(cls, v: str) -> str:

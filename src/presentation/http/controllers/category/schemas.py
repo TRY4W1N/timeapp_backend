@@ -1,4 +1,5 @@
 from typing import Union
+
 from pydantic import BaseModel
 
 from src.domain.ctx.category.dto import (
@@ -88,11 +89,12 @@ class CategoryUpdateSchema(BaseModel):
 
 
 class CategoryDeleteSchema(BaseModel):
+    user_uuid: str
     category_uuid: str
     interval_count: int
 
     @classmethod
     def from_obj(cls, obj: CategoryDeleteDTO) -> "CategoryDeleteSchema":
         return CategoryDeleteSchema(
-            category_uuid=obj.category_uuid, interval_count=obj.interval_count
+            user_uuid=obj.user_uuid, category_uuid=obj.category_uuid, interval_count=obj.interval_count
         )
