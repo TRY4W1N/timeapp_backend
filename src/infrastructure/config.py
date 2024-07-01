@@ -5,6 +5,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class ConfigBase(BaseSettings):
+    ENV: str
     APP_ENV: str
     APP_HOST: str
     APP_PORT: int
@@ -28,6 +29,11 @@ class ConfigBase(BaseSettings):
     @classmethod
     def app_env_upper(cls, v: str) -> str:
         return v.upper()
+    
+    @field_validator("ENV")
+    @classmethod
+    def env_upper(cls, v: str) -> str:
+        return v.upper()
 
     @property
     def MONGODB_URL(self) -> str:
@@ -39,7 +45,7 @@ class ConfigBase(BaseSettings):
     @property
     def DEV_USERS(self) -> dict:
         if self.APP_ENV != "DEV" or not self.DEV_USERS_JSON_PATH:
-            raise NotImplementedError("Used only in `DEV`")
+            raise NotImplementedError("Used only in `APP_ENV=DEV`")
         with open(self.DEV_USERS_JSON_PATH) as f:
             data = json.load(f)
         return data

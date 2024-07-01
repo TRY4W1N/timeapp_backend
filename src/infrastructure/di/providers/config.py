@@ -10,6 +10,6 @@ class ConfigProvider(Provider):
 
     @provide(scope=Scope.APP)
     def get_config(self) -> ConfigBase:
-        if os.environ.get("APP_ENV", "").upper() == "DOCKER":
+        if os.environ.get("ENV", "").upper() == "DOCKER":
             return ConfigDocker()  # type: ignore
         return ConfigLocal()  # type: ignore
