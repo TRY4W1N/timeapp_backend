@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
+from typing import Union
 
 
 @dataclass
@@ -31,11 +32,13 @@ class CategoryTrackCurrentSubModel(Model):
     started_at: int
 
     @classmethod
-    def from_dict(cls, data: dict) -> "CategoryTrackCurrentSubModel":
+    def from_dict(cls, data: dict | None) -> Union["CategoryTrackCurrentSubModel", None]:
+        if data is None:
+            return None
         return CategoryTrackCurrentSubModel(
             category_uuid=data["category_uuid"],
             started_at=data["started_at"],
-            interval_uuid=data["interval_uuid"],
+            interval_uuid=data["uuid"],
         )
 
 

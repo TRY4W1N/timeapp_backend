@@ -7,6 +7,7 @@ from src.infrastructure.di.alias import UserEntityType
 
 user_router = APIRouter(route_class=DishkaRoute)
 
+
 @user_router.get("/current")
 async def get_current_user(
     user: FromDishka[UserEntityType],

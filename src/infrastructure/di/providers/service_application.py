@@ -16,6 +16,7 @@ class AppServiceProvider(Provider):
         service.setup()
 
         if config.APP_ENV == "DEV":
+
             async def get_by_token_mocked(token: str) -> UserIdentityDTO:
                 if token not in config.DEV_USERS:
                     raise AuthError(msg="Error on verify token")
@@ -25,6 +26,7 @@ class AppServiceProvider(Provider):
                     name=user_dev_data["name"],
                     email=user_dev_data["email"],
                 )
+
             service.get_by_token = get_by_token_mocked
 
         return service

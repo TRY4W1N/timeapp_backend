@@ -1,4 +1,5 @@
 import pytest
+
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.usecases.category.delete import UsecaseCategoryDelete
