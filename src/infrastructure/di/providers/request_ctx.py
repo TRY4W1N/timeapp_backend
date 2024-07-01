@@ -18,5 +18,3 @@ class RequestProvider(Provider):
     async def get_user(self, token: UserToken, usecase: UsecaseUserGetByTokenType) -> UserEntity:
         print(f"Get {token=}..")
         return await usecase.execute(token=token)
-        # print(f"Token={token}, but ignored..")
-        # return UserEntity(uuid=UserId("not_uuid"), name="jayse", email="aboba@gmail.com")

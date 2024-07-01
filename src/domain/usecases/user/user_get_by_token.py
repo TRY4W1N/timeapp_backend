@@ -18,6 +18,7 @@ class UsecaseUserGetByToken(Usecase):
         user_uuid = UserId(user_identity.id)
         try:
             user_entity = await self.user_gateway.get(uuid=user_uuid)
+            print(f"Exist user: {user_entity}")
         except EntityNotFound:
             user = UserCreateDTO(
                 uuid=user_uuid,
@@ -25,4 +26,5 @@ class UsecaseUserGetByToken(Usecase):
                 email=user_identity.email,
             )
             user_entity = await self.user_gateway.create(user=user)
+            print(f"Create user: {user_entity}")
         return user_entity

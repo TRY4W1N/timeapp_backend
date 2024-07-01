@@ -22,7 +22,7 @@ clean:
 
 .PHONY: lint
 lint:
-	python -m ruff .
+	python -m ruff check .
 
 .PHONY: fmt
 fmt:

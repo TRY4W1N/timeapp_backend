@@ -1,4 +1,6 @@
-from pydantic import Field
+import json
+
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -9,6 +11,7 @@ class ConfigBase(BaseSettings):
     APP_NAME: str = "TimeApp"
     DEBUG: bool = Field(default=False)
     FIREBASE_SECRET_PATH: str
+    DEV_USERS_JSON_PATH: str
 
     MONGODB_HOST: str
     MONGODB_PORT: str
@@ -21,12 +24,25 @@ class ConfigBase(BaseSettings):
     MONGODB_COLLECTION_TIMEDAY: str
     MONGODB_COLLECTION_TIMEALL: str
 
+    @field_validator("APP_ENV")
+    @classmethod
+    def app_env_upper(cls, v: str) -> str:
+        return v.upper()
+
     @property
     def MONGODB_URL(self) -> str:
         auth_block = ""
         if all([self.MONGODB_USERNAME, self.MONGODB_PASSWORD]):
             auth_block = f"{self.MONGODB_USERNAME}:{self.MONGODB_PASSWORD}@"
         return f"mongodb://{auth_block}{self.MONGODB_HOST}:{self.MONGODB_PORT}?authSource={self.MONGODB_DATABASE}&retryWrites=true&w=majority"
+
+    @property
+    def DEV_USERS(self) -> dict:
+        if self.APP_ENV != "DEV" or not self.DEV_USERS_JSON_PATH:
+            raise NotImplementedError("Used only in `DEV`")
+        with open(self.DEV_USERS_JSON_PATH) as f:
+            data = json.load(f)
+        return data
 
 
 class ConfigLocal(ConfigBase):
