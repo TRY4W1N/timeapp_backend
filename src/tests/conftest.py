@@ -2,14 +2,17 @@ import asyncio
 from collections.abc import AsyncGenerator
 
 import pytest
-from dishka import AsyncContainer, make_async_container
+from dishka import AsyncContainer
+from pytest_mock import MockerFixture
 
+from src.domain.ctx.auth.dto import UserIdentityDTO
 from src.domain.ctx.category.interface.gateway import CategoryGateway
+from src.domain.ctx.user.entity import UserEntity
+from src.domain.ctx.user.interface.types import UserId
 from src.infrastructure.config import Config
 from src.infrastructure.database.mongodb.database import DatabaseMongo
 from src.infrastructure.di.container import build_container
 from src.tests.dataloader import Dataloader
-from src.tests.fixtures.auth.app_service import MockAppServiceProvider
 
 
 @pytest.fixture(scope="session")
@@ -41,12 +44,27 @@ async def dl(dicon: AsyncContainer) -> AsyncGenerator[Dataloader, None]:
 
 
 @pytest.fixture(scope="function")
+async def fx_user(dl: Dataloader) -> UserEntity:
+    user_model = await dl.user_loader.create()
+    return UserEntity(uuid=UserId(user_model.uuid), email=user_model.email, name=user_model.name)
+
+
+@pytest.fixture(scope="function")
 async def gateway_category(dicon: AsyncContainer) -> AsyncGenerator[CategoryGateway, None]:
     yield await dicon.get(CategoryGateway, component="GATEWAY")
 
 
 @pytest.fixture(scope="function")
-async def mock_app_service_container():
-    container = make_async_container(MockAppServiceProvider())
-    yield container
-    await container.close()
+async def mock_auth_service_get_by_token(
+    mocker: MockerFixture, fx_user: UserEntity
+) -> AsyncGenerator[UserIdentityDTO, None]:
+    user_identity_static = UserIdentityDTO(
+        id=fx_user.uuid,
+        name=fx_user.name,
+        email=fx_user.email,
+    )
+    mocker.patch(
+        "src.application.service.auth.firebase.service.AuthServiceFirebase.get_by_token",
+        return_value=user_identity_static,
+    )
+    yield user_identity_static
