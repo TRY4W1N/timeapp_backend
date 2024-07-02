@@ -1,5 +1,6 @@
 import pymongo
 
+from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
 from src.domain.ctx.category.dto import (
     CategoryCreateDTO,
     CategoryDeleteDTO,
@@ -11,7 +12,6 @@ from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.interface.types import UserId
-from src.domain.exception.base import EntityNotCreated, EntityNotFound
 from src.infrastructure.database.mongodb.gateways.base import (
     GatewayMongoBase,
     MongoCollectionType,

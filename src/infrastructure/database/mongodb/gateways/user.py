@@ -1,8 +1,8 @@
+from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
 from src.domain.ctx.user.dto import UserCreateDTO
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.gateway import UserGateway
 from src.domain.ctx.user.interface.types import UserId
-from src.domain.exception.base import EntityNotCreated, EntityNotFound
 from src.infrastructure.database.mongodb.gateways.base import (
     GatewayMongoBase,
     MongoCollectionType,

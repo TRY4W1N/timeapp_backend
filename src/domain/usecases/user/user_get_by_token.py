@@ -1,10 +1,10 @@
+from src.domain.common.exception.base import EntityNotFound
 from src.domain.common.interface.usecase.base import Usecase
 from src.domain.ctx.auth.interface.service import AuthService
 from src.domain.ctx.user.dto import UserCreateDTO
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.gateway import UserGateway
 from src.domain.ctx.user.interface.types import UserId
-from src.domain.exception.base import EntityNotFound
 
 
 class UsecaseUserGetByToken(Usecase):
