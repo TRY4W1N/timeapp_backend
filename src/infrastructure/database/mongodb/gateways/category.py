@@ -123,7 +123,7 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         # Filter fields assert
         assert obj._count_fields == 2
 
-        ## Category build filter
+        # Category build filter
         category_filter: dict = {"user_uuid": user_uuid}
         if isinstance(obj.name__like, str):
             category_filter["name"] = {"$regex": obj.name__like, "$options": "i"}
@@ -170,6 +170,7 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         )
         interval_data_list = await interval_data_query.to_list(length=None)
 
+        # Manual mapping results and build entity list
         interval_dict = {}
         for item in interval_data_list:
             interval_dict.setdefault(item["category_uuid"], []).append(item)
