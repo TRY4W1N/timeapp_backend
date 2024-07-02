@@ -1,9 +1,9 @@
 from dishka import Provider, Scope, provide
 
 from src.application.service.auth.firebase.service import AuthServiceFirebase
+from src.domain.common.exception.base import AuthError
 from src.domain.ctx.auth.dto import UserIdentityDTO
 from src.domain.ctx.auth.interface.service import AuthService
-from src.domain.exception.base import AuthError
 from src.infrastructure.di.alias import ConfigType
 
 

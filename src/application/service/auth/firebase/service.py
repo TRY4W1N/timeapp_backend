@@ -11,9 +11,9 @@ from src.application.service.auth.firebase.dto import (
 )
 from src.application.service.auth.firebase.enum import AuthProviderEnum
 from src.application.service.auth.firebase.exception import FirebaseError
+from src.domain.common.exception.base import AuthError
 from src.domain.ctx.auth.dto import UserIdentityDTO
 from src.domain.ctx.auth.interface.service import AuthService
-from src.domain.exception.base import AuthError
 
 
 class AuthServiceFirebase(AuthService):

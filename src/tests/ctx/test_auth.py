@@ -1,8 +1,8 @@
 import pytest
 from dishka import AsyncContainer
 
+from src.domain.common.exception.base import AuthError
 from src.domain.ctx.auth.interface.service import AuthService
-from src.domain.exception.base import AuthError
 
 
 # pytest src/tests/ctx/test_auth.py::test_token_error -v -s

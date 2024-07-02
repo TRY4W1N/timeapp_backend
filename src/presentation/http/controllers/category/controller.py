@@ -10,6 +10,10 @@ from src.infrastructure.di.alias import (
     UsecaseCategoryUpdateType,
     UserEntityType,
 )
+from src.presentation.http.common.responses import (
+    response_400_not_created,
+    response_404,
+)
 from src.presentation.http.controllers.category.schemas import (
     CategoryCreateSchema,
     CategoryDeleteSchema,
@@ -33,7 +37,7 @@ async def category_list(
     return CategoryListSchema.from_obj(obj_list=result)
 
 
-@category_router.post("/")
+@category_router.post("/", responses={**response_400_not_created})
 async def category_create(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseCategoryCreateType],
@@ -44,7 +48,7 @@ async def category_create(
     return CategorySchema.from_obj(obj=result)
 
 
-@category_router.patch("/{uuid}")
+@category_router.patch("/{uuid}", responses={**response_404})
 async def category_update(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseCategoryUpdateType],
@@ -56,7 +60,7 @@ async def category_update(
     return CategorySchema.from_obj(obj=result)
 
 
-@category_router.delete("/delete/{uuid}")
+@category_router.delete("/{uuid}", responses={**response_404})
 async def category_delete(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseCategoryDeleteType],
