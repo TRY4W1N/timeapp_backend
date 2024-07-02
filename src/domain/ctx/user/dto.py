@@ -4,8 +4,7 @@ from src.domain.ctx.user.interface.types import UserId
 
 
 @dataclass
-class UserEntity:
+class UserCreateDTO:
     uuid: UserId
     name: str
     email: str
-    time_zone: str

@@ -1,20 +1,59 @@
-from pydantic import Field
+import json
+
+from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
-class Config(BaseSettings):
-    APP_HOST: str = "127.0.0.1"
-    APP_PORT: int = 8000
+class ConfigBase(BaseSettings):
+    ENV: str
+    APP_ENV: str
+    APP_HOST: str
+    APP_PORT: int
     APP_NAME: str = "TimeApp"
     DEBUG: bool = Field(default=False)
-    FIREBASE_SECRET_PATH: str = Field(default=False)
+    FIREBASE_SECRET_PATH: str
+    DEV_USERS_JSON_PATH: str
 
-    MONGODB_URL: str = "mongodb://127.0.0.1?retryWrites=true&w=majority"
-    MONGODB_DATABASE: str = "timeappdb"
-    MONGODB_COLLECTION_USER: str = Field(default="User")
-    MONGODB_COLLECTION_CATEGORY: str = Field(default="Category")
-    MONGODB_COLLECTION_INTERVAL: str = Field(default="Interval")
-    MONGODB_COLLECTION_TIMEDAY: str = Field(default="TimeDay")
-    MONGODB_COLLECTION_TIMEALL: str = Field(default="TimeAll")
+    MONGODB_HOST: str
+    MONGODB_PORT: str
+    MONGODB_USERNAME: str | None = None
+    MONGODB_PASSWORD: str | None = None
+    MONGODB_DATABASE: str
+    MONGODB_COLLECTION_USER: str
+    MONGODB_COLLECTION_CATEGORY: str
+    MONGODB_COLLECTION_INTERVAL: str
+    MONGODB_COLLECTION_TIMEDAY: str
+    MONGODB_COLLECTION_TIMEALL: str
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    @field_validator("APP_ENV")
+    @classmethod
+    def app_env_upper(cls, v: str) -> str:
+        return v.upper()
+
+    @field_validator("ENV")
+    @classmethod
+    def env_upper(cls, v: str) -> str:
+        return v.upper()
+
+    @property
+    def MONGODB_URL(self) -> str:
+        auth_block = ""
+        if all([self.MONGODB_USERNAME, self.MONGODB_PASSWORD]):
+            auth_block = f"{self.MONGODB_USERNAME}:{self.MONGODB_PASSWORD}@"
+        return f"mongodb://{auth_block}{self.MONGODB_HOST}:{self.MONGODB_PORT}?authSource={self.MONGODB_DATABASE}&retryWrites=true&w=majority"
+
+    @property
+    def DEV_USERS(self) -> dict:
+        if self.APP_ENV != "DEV" or not self.DEV_USERS_JSON_PATH:
+            raise NotImplementedError("Used only in `APP_ENV=DEV`")
+        with open(self.DEV_USERS_JSON_PATH) as f:
+            data = json.load(f)
+        return data
+
+
+class ConfigLocal(ConfigBase):
+    model_config = SettingsConfigDict(env_file="local.env", env_file_encoding="utf-8", extra="ignore")
+
+
+class ConfigDocker(ConfigBase):
+    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")

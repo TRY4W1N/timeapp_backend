@@ -1,3 +1,5 @@
+import pytest
+
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.usecases.category.delete import UsecaseCategoryDelete
@@ -13,7 +15,7 @@ async def test_ok(dl: Dataloader, fx_user: UserEntity, usecase_category_delete: 
     uc = usecase_category_delete
     category_model = await dl.category_loader.create(user_uuid=fx_user.uuid)
     interval_fltr = {"user_uuid": fx_user.uuid, "category_uuid": category_model.uuid}
-    
+
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
 
@@ -25,6 +27,9 @@ async def test_ok(dl: Dataloader, fx_user: UserEntity, usecase_category_delete: 
     result = await uc.execute(user=fx_user, category_uuid=CategoryId(category_model.uuid))
 
     # Assert
+    with pytest.raises(Exception) as exc:
+        category_model = await dl.category_loader.get(fltr=dict(uuid=category_model.uuid))
+    assert "Not found" in str(exc.value)
     interval_after_model_list = await dl.interval_loader.get_lst(fltr=interval_fltr)
     interval_after_count = len(interval_after_model_list)
 

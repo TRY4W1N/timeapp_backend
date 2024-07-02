@@ -10,6 +10,7 @@ mongotest:
 envbuild:
 	python3.11 -m venv venv
 	source venv/bin/activate
+	pip install --upgrade pip
 	pip install -r requirements.txt
 
 .PHONY: envupdate
@@ -22,7 +23,7 @@ clean:
 
 .PHONY: lint
 lint:
-	python -m ruff .
+	python -m ruff check .
 
 .PHONY: fmt
 fmt:
@@ -39,4 +40,8 @@ testlocal:
 
 .PHONY: run
 run:
-	python -m src.presentation.http.app
+	export APP_ENV=DEV & export ENV=LOCAL & python -m src.presentation.http.app
+
+.PHONY: rundocker
+rundocker:
+	docker compose -f docker-compose.dev.yaml up --build

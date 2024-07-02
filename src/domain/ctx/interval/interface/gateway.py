@@ -7,7 +7,6 @@ from src.domain.ctx.interval.dto import (
     IntervalStopDTO,
 )
 from src.domain.ctx.user.entity import UserEntity
-from src.domain.ctx.user.interface.types import UserId
 
 
 class IntervalGateway(ABC):

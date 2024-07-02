@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from dataclasses import asdict, dataclass
-from datetime import timezone
+from typing import Union
 
 
 @dataclass
@@ -27,19 +27,19 @@ class UserModel(Model):
 
 
 @dataclass
-class CategoryTrackInfoSubModel(Model):
+class CategoryTrackCurrentSubModel(Model):
     category_uuid: str
-    active: bool
-    started_at: int | None
-    interval_uuid: str | None
+    interval_uuid: str
+    started_at: int
 
     @classmethod
-    def from_dict(cls, data: dict) -> "CategoryTrackInfoSubModel":
-        return CategoryTrackInfoSubModel(
+    def from_dict(cls, data: dict | None) -> Union["CategoryTrackCurrentSubModel", None]:
+        if data is None:
+            return None
+        return CategoryTrackCurrentSubModel(
             category_uuid=data["category_uuid"],
-            active=data["active"],
             started_at=data["started_at"],
-            interval_uuid=data["interval_uuid"],
+            interval_uuid=data["uuid"],
         )
 
 
@@ -65,6 +65,7 @@ class CategoryModel(Model):
             position=data["position"],
         )
 
+
 @dataclass
 class IntervalModel(Model):
     uuid: str
@@ -72,7 +73,7 @@ class IntervalModel(Model):
     category_uuid: str
     started_at: int
     end_at: int | None
-    
+
     @classmethod
     def from_dict(cls, data: dict) -> "IntervalModel":
         return IntervalModel(

@@ -16,3 +16,7 @@ class AuthError(DomainError):
 
 class EntityNotFound(DomainError):
     """"""
+
+
+class EntityNotCreated(DomainError):
+    """"""

@@ -27,7 +27,4 @@ async def test_ok(dl: Dataloader, fx_user: UserEntity, usecase_category_create: 
     assert result.icon_color == icon_color
     assert result.position == position
 
-    assert result.track_info.category_uuid == result.uuid
-    assert result.track_info.interval_uuid is None
-    assert result.track_info.active is False
-    assert result.track_info.started_at is None
+    assert result.track_current is None
