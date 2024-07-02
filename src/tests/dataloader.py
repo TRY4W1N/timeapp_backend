@@ -1,5 +1,6 @@
+import random
 from abc import ABC, abstractmethod
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Generic, TypeVar
 from uuid import uuid4
 
@@ -84,6 +85,12 @@ class UserLoader(EntityLoader[UserModel]):
 
 class IntervalLoader(EntityLoader[IntervalModel]):
 
+    async def create_many(self, models: list[IntervalModel]) -> list[IntervalModel]:
+        insert_result = await self._collection.insert_many([model.to_dict() for model in models])
+        assert insert_result.acknowledged
+        created_models = await self._collection.find().to_list(length=None)
+        return [IntervalModel.from_dict(dict(**model)) for model in created_models]
+
     async def create(
         self,
         user_uuid: str,
@@ -123,6 +130,12 @@ class IntervalLoader(EntityLoader[IntervalModel]):
 
 
 class CategoryLoader(EntityLoader[CategoryModel]):
+
+    async def create_many(self, models: list[CategoryModel]) -> list[CategoryModel]:
+        insert_result = await self._collection.insert_many([model.to_dict() for model in models])
+        assert insert_result.acknowledged
+        created_models = await self._collection.find().to_list(length=None)
+        return [CategoryModel.from_dict(dict(**model)) for model in created_models]
 
     async def create(
         self,
@@ -200,3 +213,32 @@ class Dataloader:
     async def _delete_created_all(self):
         for collection in self._database._get_collection_all():
             await collection.drop()
+
+    async def generate_category_list(self, user_uuid: str, count: int, interval_count_per_one: int):
+        category_models = []
+        interval_models = []
+        for _ in range(count):
+            category_model = CategoryModel(
+                uuid=category_uuid_gen(),
+                user_uuid=user_uuid,
+                name=uuid_gen(),
+                icon=uuid_gen(),
+                icon_color=uuid_gen(),
+            )
+            category_models.append(category_model)
+            end_interval_exist = False
+            for _ in range(interval_count_per_one):
+                end_at = int((datetime.now() - timedelta(hours=1)).timestamp())
+                if random.randint(0, 1) and end_interval_exist is False:
+                    end_at = None
+                    end_interval_exist = True
+                interval_model = IntervalModel(
+                    uuid=uuid_gen(),
+                    user_uuid=user_uuid,
+                    category_uuid=category_model.uuid,
+                    started_at=int((datetime.now() - timedelta(hours=2)).timestamp()),
+                    end_at=end_at,
+                )
+                interval_models.append(interval_model)
+        await self.category_loader.create_many(models=category_models)
+        await self.interval_loader.create_many(models=interval_models)

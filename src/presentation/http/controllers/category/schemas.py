@@ -62,6 +62,7 @@ class CategoryListSchema(BaseModel):
 
 class CategoryFilterSchema(BaseModel):
     name__like: str | None = None
+    active__eq: bool | None = None
 
     def to_obj(self) -> CategoryFilterDTO:
         return CategoryFilterDTO(**self.model_dump(exclude_unset=True))

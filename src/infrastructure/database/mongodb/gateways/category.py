@@ -120,4 +120,69 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         )
 
     async def lst(self, user_uuid: UserId, obj: CategoryFilterDTO) -> list[CategoryEntity]:
-        return await super().lst(user_uuid, obj)  # type: ignore
+        # Filter fields assert
+        assert obj._count_fields == 2
+
+        # Category build filter
+        category_filter: dict = {"user_uuid": user_uuid}
+        if isinstance(obj.name__like, str):
+            category_filter["name"] = {"$regex": obj.name__like, "$options": "i"}
+        if isinstance(obj.active__eq, bool):
+            category_filter["active"] = obj.active__eq
+
+        # Category select
+        category_cursor = self.category_collection.aggregate(
+            pipeline=[
+                {
+                    "$match": category_filter,
+                },
+                {
+                    "$sort": {
+                        "position": pymongo.ASCENDING,
+                    },
+                },
+            ],
+            allowDiskUse=True,
+        )
+        category_data_list = await category_cursor.to_list(length=None)
+
+        # Interval select
+        category_uuid_list = [item["uuid"] for item in category_data_list]
+        interval_fltr = {
+            "user_uuid": user_uuid,
+            "category_uuid": {"$in": category_uuid_list},
+            "started_at": {"$ne": None},
+            "end_at": {"$eq": None},
+        }
+        interval_data_query = self.interval_collection.aggregate(
+            pipeline=[
+                {
+                    "$match": interval_fltr,
+                },
+                {
+                    "$sort": {
+                        "started_at": pymongo.DESCENDING,
+                    },
+                },
+                {"$limit": 1},
+            ],
+            allowDiskUse=True,
+        )
+        interval_data_list = await interval_data_query.to_list(length=None)
+
+        # Manual mapping results and build entity list
+        interval_dict = {}
+        for item in interval_data_list:
+            interval_dict.setdefault(item["category_uuid"], []).append(item)
+
+        category_entity_list: list[CategoryEntity] = []
+        for category_item in category_data_list:
+            interval_item_list = interval_dict.get(category_item["uuid"], [])
+            interval_item = None
+            if len(interval_item_list) == 1:
+                interval_item = dict(**interval_item_list[0])
+            category_model = CategoryModel.from_dict(dict(**category_item))
+            track_current_model = CategoryTrackCurrentSubModel.from_dict(interval_item)
+            category_entity = build_category_entity(model=category_model, track_current=track_current_model)
+            category_entity_list.append(category_entity)
+        return category_entity_list
