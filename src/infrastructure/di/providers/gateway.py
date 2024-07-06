@@ -23,8 +23,9 @@ class GatewayProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def get_interval(self, database: DatabaseMongoType, config: ConfigType) -> AsyncIterable[IntervalGateway]:
-        collection = database.get_collection(config.MONGODB_COLLECTION_INTERVAL)
-        gateway = IntervalGatewayMongo(collection=collection)
+        interval_collection = database.get_collection(config.MONGODB_COLLECTION_INTERVAL)
+        category_collection = database.get_collection(config.MONGODB_COLLECTION_CATEGORY)
+        gateway = IntervalGatewayMongo(category_collection=category_collection, interval_collection=interval_collection)
         yield gateway
 
     @provide(scope=Scope.REQUEST)

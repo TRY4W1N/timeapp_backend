@@ -19,11 +19,11 @@ class UserModel(Model):
     uuid: str
     name: str
     email: str
-    utc: str
+    time_zone: str
 
     @classmethod
     def from_dict(cls, data: dict) -> "UserModel":
-        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], utc=data["utc"])
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], time_zone=data["time_zone"])
 
 
 @dataclass

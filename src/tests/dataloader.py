@@ -49,7 +49,7 @@ class UserLoader(EntityLoader[UserModel]):
         uuid: str | None = None,
         name: str | None = None,
         email: str | None = None,
-        utc: str | None = None,
+        time_zone: str | None = None,
     ) -> UserModel:
         if uuid is None:
             uuid = user_uuid_gen()
@@ -57,14 +57,14 @@ class UserLoader(EntityLoader[UserModel]):
             name = uuid_gen()
         if email is None:
             email = uuid_gen()
-        if utc is None:
+        if time_zone is None:
             utc = "Europe/Prague"
         insert_result = await self._collection.insert_one(
             dict(
                 uuid=uuid,
                 name=name,
                 email=email,
-                utc=utc,
+                time_zone=time_zone,
             )
         )
         assert insert_result.acknowledged
@@ -72,21 +72,11 @@ class UserLoader(EntityLoader[UserModel]):
         if created_model is None:
             raise Exception("Fail")
         data = dict(**created_model)
-        return UserModel(
-            uuid=data["uuid"],
-            name=data["name"],
-            email=data["email"],
-            utc=data["utc"]
-        )
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], time_zone=data["time_zone"])
 
     async def get(self, fltr: dict) -> UserModel:
         data = await self._get(fltr=fltr)
-        return UserModel(
-            uuid=data["uuid"],
-            name=data["name"],
-            email=data["email"],
-            utc=data["utc"]
-        )
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], time_zone=data["utc"])
 
 
 class IntervalLoader(EntityLoader[IntervalModel]):

@@ -1,8 +1,6 @@
-from datetime import datetime
-from pytz import timezone
-
 from pymongo import ReturnDocument
 
+from src.domain.common.exception.base import EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.dto import (
     IntervalClearDTO,
@@ -13,7 +11,7 @@ from src.domain.ctx.interval.interface.gateway import IntervalGateway
 from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.types import UserId
-from src.infrastructure.database.exception import DocumentNotCreated
+from src.domain.exception.base import DocumentNotCreated, DocumentNotUpdated
 from src.infrastructure.database.mongodb.gateways.base import (
     GatewayMongoBase,
     MongoCollectionType,
@@ -21,46 +19,68 @@ from src.infrastructure.database.mongodb.gateways.base import (
 from src.infrastructure.database.mongodb.models import IntervalModel
 
 
-def get_user_datetime_in_timestamp(user_utc: str) -> int:
-    user_utc_datetime = datetime.now(timezone(user_utc))
-    timestamp = int(round(user_utc_datetime.timestamp()))
-    return timestamp
-
-
 class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
 
-    def __init__(self, collection: MongoCollectionType) -> None:
-        self.collection = collection
+    def __init__(self, interval_collection: MongoCollectionType, category_collection: MongoCollectionType) -> None:
+        self.interval_collection = interval_collection
+        self.category_collection = category_collection
 
-    async def start(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStartDTO:
-        started_datetime = get_user_datetime_in_timestamp(user_utc=user.time_zone)
-
+    async def start(self, user: UserEntity, category_uuid: CategoryId, started_at: int) -> IntervalStartDTO:
+        category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
+        category = await self.category_collection.find_one(filter=category_filter)
+        if category is None:
+            raise EntityNotFound(msg=f"{category_uuid=}")
         model = IntervalModel(
             uuid=self.gen_uuid(),
             user_uuid=user.uuid,
             category_uuid=category_uuid,
-            started_at=started_datetime,
+            started_at=started_at,
             end_at=None,
         )
-        insert_one = await self.collection.insert_one(model.to_dict())
-        created_model = await self.collection.find_one(filter={"_id": insert_one.inserted_id})
+        insert_one = await self.interval_collection.insert_one(model.to_dict())
+        created_model = await self.interval_collection.find_one(filter={"_id": insert_one.inserted_id})
         if created_model is None:
             raise DocumentNotCreated(f"{user.uuid=}, {category_uuid=}")
+
+        interval_filter = {
+            "user_uuid": user.uuid,
+            "category_uuid": category_uuid,
+            "started_at": started_at,
+            "_id": {"$ne": insert_one.inserted_id},
+        }
+
+        same_intervals_as_inserted = self.interval_collection.aggregate(
+            pipeline=[{"$match": interval_filter}], allowDiskUse=True
+        )
+        unnecessary_interval_models = await same_intervals_as_inserted.to_list(length=None)
+        if len(unnecessary_interval_models) > 0:
+            await self.interval_collection.delete_many(filter=interval_filter)
+
         return IntervalStartDTO(
             user_uuid=UserId(user.uuid),
             category_uuid=CategoryId(category_uuid),
             interval_uuid=IntervalId(insert_one.inserted_id),
         )
 
-    async def stop(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStopDTO:
-        stopped_datetime = get_user_datetime_in_timestamp(user_utc=user.time_zone)
-        fltr = {"category_uuid": category_uuid, "user_uuid": user.uuid}
-        update_one = await self.collection.find_one_and_update(
-            filter=fltr, update={"$set": {"end_at": stopped_datetime}}, return_document=ReturnDocument.AFTER
-        )
+    async def stop(self, user: UserEntity, category_uuid: CategoryId, stopped_at: int) -> IntervalStopDTO:
+        category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
+        category = await self.category_collection.find_one(filter=category_filter)
+        if category is None:
+            raise EntityNotFound(msg=f"{category_uuid=}")
 
-        assert update_one
+        fltr = {"category_uuid": category_uuid, "user_uuid": user.uuid}
+        update_one = await self.interval_collection.find_one_and_update(
+            filter=fltr, update={"$set": {"end_at": stopped_at}}, return_document=ReturnDocument.AFTER
+        )
+        if update_one is None:
+            raise DocumentNotUpdated(f"{category_uuid}")
         return IntervalStopDTO(user_uuid=user.uuid, category_uuid=category_uuid, interval_uuid=update_one["uuid"])
 
     async def clear(self, user: UserEntity, category_uuid: CategoryId) -> IntervalClearDTO:
-        return await super().clear(user_uuid, category_uuid)  # type: ignore
+        interval_filter = {"user_uuid": user.uuid, "category_uuid": category_uuid}
+        interval_delete_execution = await self.interval_collection.delete_many(filter=interval_filter)
+        assert interval_delete_execution.acknowledged
+
+        return IntervalClearDTO(
+            user_uuid=user.uuid, category_uuid=category_uuid, interval_count=interval_delete_execution.deleted_count
+        )
