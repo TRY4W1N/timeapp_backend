@@ -1,6 +1,6 @@
 from pymongo import ReturnDocument
 
-from src.domain.common.exception.base import EntityNotFound
+from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.dto import (
     IntervalClearDTO,
@@ -11,7 +11,6 @@ from src.domain.ctx.interval.interface.gateway import IntervalGateway
 from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.types import UserId
-from src.domain.exception.base import DocumentNotCreated, DocumentNotUpdated
 from src.infrastructure.database.mongodb.gateways.base import (
     GatewayMongoBase,
     MongoCollectionType,
@@ -40,7 +39,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         insert_one = await self.interval_collection.insert_one(model.to_dict())
         created_model = await self.interval_collection.find_one(filter={"_id": insert_one.inserted_id})
         if created_model is None:
-            raise DocumentNotCreated(f"{user.uuid=}, {category_uuid=}")
+            raise EntityNotCreated(msg=f"{user.uuid=}, {category_uuid=}")
 
         interval_filter = {
             "user_uuid": user.uuid,
@@ -73,7 +72,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
             filter=fltr, update={"$set": {"end_at": stopped_at}}, return_document=ReturnDocument.AFTER
         )
         if update_one is None:
-            raise DocumentNotUpdated(f"{category_uuid}")
+            raise EntityNotFound(msg=f"{category_uuid}")
         return IntervalStopDTO(user_uuid=user.uuid, category_uuid=category_uuid, interval_uuid=update_one["uuid"])
 
     async def clear(self, user: UserEntity, category_uuid: CategoryId) -> IntervalClearDTO:

@@ -7,7 +7,6 @@ from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
 from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.entity import UserEntity
-from src.domain.exception.base import DocumentNotUpdated
 from src.tests.conftest import dl, fx_user, gateway_interval
 from src.tests.dataloader import Dataloader
 
@@ -40,7 +39,7 @@ async def test_interval_stop_category_not_found_err(fx_user: UserEntity, gateway
     # Assert
     with pytest.raises(EntityNotFound) as err:
         await gateway_interval.stop(user=fx_user, category_uuid=category_uuid_not_exist, stopped_at=timestamp)
-    assert f"{category_uuid_not_exist=}" in str(err.value)
+    assert category_uuid_not_exist in str(err.value)
 
 
 # pytest src/tests/ctx/interval/test_gateway.py::test_interval_stop_not_updated -v -s
@@ -54,7 +53,7 @@ async def test_interval_stop_not_updated(dl: Dataloader, fx_user: UserEntity, ga
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=mock_category.uuid)
 
     # Assert
-    with pytest.raises(DocumentNotUpdated) as err:
+    with pytest.raises(EntityNotFound) as err:
         await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid), stopped_at=timestamp)
     assert f"{category.uuid}" in str(err.value)
 
