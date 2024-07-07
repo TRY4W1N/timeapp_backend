@@ -34,7 +34,7 @@ class UserGatewayMongo(GatewayMongoBase, UserGateway):
         return build_user_entity(model=model)
 
     async def create(self, user: UserCreateDTO) -> UserEntity:
-        model = UserModel(uuid=user.uuid, email=user.email, name=user.name, time_zone=user.time_zone)
+        model = UserModel(uuid=user.uuid, email=user.email, name=user.name, time_zone=user.time_zone)  # type: ignore time-zone not implemented
         insert_result = await self.collection.insert_one(model.to_dict())
         assert insert_result.acknowledged
         created_model = await self.collection.find_one(filter={"_id": insert_result.inserted_id})

@@ -8,4 +8,4 @@ class UserCreateDTO:
     uuid: UserId
     name: str
     email: str
-    time_zone: str
+    time_zone: str | None = None

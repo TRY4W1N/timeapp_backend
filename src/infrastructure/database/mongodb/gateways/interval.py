@@ -54,11 +54,10 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         unnecessary_interval_models = await same_intervals_as_inserted.to_list(length=None)
         if len(unnecessary_interval_models) > 0:
             await self.interval_collection.delete_many(filter=interval_filter)
-
         return IntervalStartDTO(
             user_uuid=UserId(user.uuid),
             category_uuid=CategoryId(category_uuid),
-            interval_uuid=IntervalId(insert_one.inserted_id),
+            interval_uuid=IntervalId(created_model["uuid"]),
         )
 
     async def stop(self, user: UserEntity, category_uuid: CategoryId, stopped_at: int) -> IntervalStopDTO:
