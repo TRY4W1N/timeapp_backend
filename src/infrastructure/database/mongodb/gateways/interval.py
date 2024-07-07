@@ -56,22 +56,6 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if created_model is None:
             raise EntityNotCreated(msg=f"{user.uuid=}, {category_uuid=}")
 
-        # Проверка на то, что у нас могут быть интервалы с одинаковым стартом (2 запроса одновременно) + есть тест
-
-        # interval_filter = {
-        #     "user_uuid": user.uuid,
-        #     "category_uuid": category_uuid,
-        #     "started_at": started_at,
-        #     "_id": {"$ne": insert_one.inserted_id},
-        # }
-
-        # same_intervals_as_inserted = self.interval_collection.aggregate(
-        #     pipeline=[{"$match": interval_filter}], allowDiskUse=True
-        # )
-        # unnecessary_interval_models = await same_intervals_as_inserted.to_list(length=None)
-        # if len(unnecessary_interval_models) > 0:
-        #     await self.interval_collection.delete_many(filter=interval_filter)
-
         return IntervalStartDTO(
             user_uuid=UserId(user.uuid),
             category_uuid=CategoryId(category_uuid),

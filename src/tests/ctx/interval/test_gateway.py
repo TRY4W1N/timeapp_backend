@@ -131,46 +131,6 @@ async def test_interval_start_started_interval_already_exist(
     assert res.user_uuid == fx_user.uuid
 
 
-# pytest src/tests/ctx/interval/test_gateway.py::test_interval_start_multiple_request_at_the_same_time -v -s
-# async def test_interval_start_multiple_request_at_the_same_time(
-#     dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway
-# ):
-#     # Arrange
-#     category = await dl.category_loader.create(user_uuid=fx_user.uuid)
-#     started_at = datetime.now()
-#     timestamp = int(round(started_at.timestamp()))
-
-#     mokc_timestamp = timestamp + 100
-
-#     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=mokc_timestamp)
-
-#     # Act
-#     res = await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid), started_at=timestamp)
-#     await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid), started_at=timestamp)
-#     await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid), started_at=timestamp)
-
-#     # Assert
-#     # Only one record was added during the multi-query requests
-#     interval_fltr = {
-#         "user_uuid": fx_user.uuid,
-#         "category_uuid": category.uuid,
-#         "started_at": timestamp,
-#     }
-#     count_added_intervals = await dl.interval_loader.get_lst(fltr=interval_fltr)
-#     assert len(count_added_intervals) == 1
-#     assert res.category_uuid == CategoryId(category.uuid)
-#     assert res.interval_uuid
-#     assert res.user_uuid == fx_user.uuid
-
-#     # Check that other records exist
-#     fltr = {
-#         "user_uuid": fx_user.uuid,
-#         "category_uuid": category.uuid,
-#     }
-#     count_all_intervals = await dl.interval_loader.get_lst(fltr=fltr)
-#     assert len(count_all_intervals) > len(count_added_intervals)
-
-
 # pytest src/tests/ctx/interval/test_gateway.py::test_interval_start_category_not_find -v -s
 async def test_interval_start_category_not_find(dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway):
     # Arrange
