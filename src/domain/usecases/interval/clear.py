@@ -11,5 +11,5 @@ class UsecaseIntervalClear(Usecase):
         self.interval_gateway = interval_gateway
 
     async def execute(self, user: UserEntity, category_uuid: CategoryId) -> IntervalClearDTO:
-        interval_clear = await self.interval_gateway.clear(user_uuid=user.uuid, category_uuid=category_uuid)
+        interval_clear = await self.interval_gateway.clear(user=user, category_uuid=category_uuid)
         return interval_clear

@@ -19,10 +19,11 @@ class UserModel(Model):
     uuid: str
     name: str
     email: str
+    utc: str
 
     @classmethod
     def from_dict(cls, data: dict) -> "UserModel":
-        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"])
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], utc=data["utc"])
 
 
 @dataclass

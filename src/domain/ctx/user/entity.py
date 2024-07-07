@@ -8,3 +8,4 @@ class UserEntity:
     uuid: UserId
     name: str
     email: str
+    utc: str

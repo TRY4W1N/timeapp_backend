@@ -3,7 +3,6 @@ import asyncio
 import firebase_admin
 from firebase_admin import App, auth
 from firebase_admin._user_mgt import ProviderUserInfo, UserRecord
-
 from src.application.service.auth.firebase.dto import (
     ProviderIdentity,
     TokenIdentity,
