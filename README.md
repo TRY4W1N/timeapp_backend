@@ -169,4 +169,5 @@ If venv exist:
 *In env*
 make envupdate # Update venv
 make run # Run app
+make rundocker # Run app with mongodb
 ```
