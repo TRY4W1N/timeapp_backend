@@ -10,6 +10,7 @@ from src.tests.dataloader import Dataloader
 async def test_start_interval_ok(
     dl: Dataloader, fx_user: UserEntity, usecase_interval_track_start: UsecaseIntervalTrackStart
 ):
+    print()
     # Arrange
     uc = usecase_interval_track_start
     category_model = await dl.category_loader.create()

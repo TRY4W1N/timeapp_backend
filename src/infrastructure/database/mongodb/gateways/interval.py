@@ -29,6 +29,21 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         category = await self.category_collection.find_one(filter=category_filter)
         if category is None:
             raise EntityNotFound(msg=f"{category_uuid=}")
+
+        interval_filter = {
+            "category_uuid": category_uuid,
+            "user_uuid": user.uuid,
+            "end_at": {"$eq": None},
+        }
+        interval_data_query = self.interval_collection.aggregate(
+            pipeline=[{"$match": interval_filter}], allowDiskUse=True
+        )
+        interval_data_list = await interval_data_query.to_list(length=None)
+        if len(interval_data_list) != 0:
+            for interval in interval_data_list:
+                fltr = {"uuid": interval["uuid"]}
+                await self.interval_collection.find_one_and_update(filter=fltr, update={"$set": {"end_at": started_at}})
+
         model = IntervalModel(
             uuid=self.gen_uuid(),
             user_uuid=user.uuid,
@@ -41,19 +56,22 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if created_model is None:
             raise EntityNotCreated(msg=f"{user.uuid=}, {category_uuid=}")
 
-        interval_filter = {
-            "user_uuid": user.uuid,
-            "category_uuid": category_uuid,
-            "started_at": started_at,
-            "_id": {"$ne": insert_one.inserted_id},
-        }
+        # Проверка на то, что у нас могут быть интервалы с одинаковым стартом (2 запроса одновременно) + есть тест
 
-        same_intervals_as_inserted = self.interval_collection.aggregate(
-            pipeline=[{"$match": interval_filter}], allowDiskUse=True
-        )
-        unnecessary_interval_models = await same_intervals_as_inserted.to_list(length=None)
-        if len(unnecessary_interval_models) > 0:
-            await self.interval_collection.delete_many(filter=interval_filter)
+        # interval_filter = {
+        #     "user_uuid": user.uuid,
+        #     "category_uuid": category_uuid,
+        #     "started_at": started_at,
+        #     "_id": {"$ne": insert_one.inserted_id},
+        # }
+
+        # same_intervals_as_inserted = self.interval_collection.aggregate(
+        #     pipeline=[{"$match": interval_filter}], allowDiskUse=True
+        # )
+        # unnecessary_interval_models = await same_intervals_as_inserted.to_list(length=None)
+        # if len(unnecessary_interval_models) > 0:
+        #     await self.interval_collection.delete_many(filter=interval_filter)
+
         return IntervalStartDTO(
             user_uuid=UserId(user.uuid),
             category_uuid=CategoryId(category_uuid),

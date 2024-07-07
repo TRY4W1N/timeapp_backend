@@ -11,6 +11,7 @@ from src.tests.dataloader import Dataloader
 async def test_stop_interval_ok(
     dl: Dataloader, fx_user: UserEntity, usecase_interval_track_stop: UsecaseIntervalTrackStop
 ):
+    print()
     # Arrange
     uc = usecase_interval_track_stop
     category_model = await dl.category_loader.create()
