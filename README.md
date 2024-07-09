@@ -20,7 +20,6 @@ Run develop docker: `make rundocker`
             "name": "aboba_name",
             "email": "aboba@mail.ru"
         }
-        // you can put *users* how many you want
     }
     ```
 
