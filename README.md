@@ -2,38 +2,55 @@
 
 Run tests: `make testlocal`
 
+Run develop docker: `make rundocker`
+
 ## Develop
 
-.env file:
+**All actions do in root project directory!**
 
-```ini
-ENV=DOCKER
+### Common
 
-DEBUG=true
-MONGODB_COLLECTION_USER=User
-MONGODB_COLLECTION_CATEGORY=Category
-MONGODB_COLLECTION_INTERVAL=Interval
-MONGODB_COLLECTION_TIMEDAY=TimeDay
-MONGODB_COLLECTION_TIMEALL=TimeAll
+- Create `dev_user_list.json` file:
 
-MONGO_INITDB_ROOT_USERNAME=*ChangeMe*
-MONGO_INITDB_ROOT_PASSWORD=*ChangeMe*
+    ```json
+    {
+        "aboba_token": {
+            "token": "aboba_token",
+            "id": "aboba_id",
+            "name": "aboba_name",
+            "email": "aboba@mail.ru"
+        }
+        // you can put *users* how many you want
+    }
+    ```
 
-MONGODB_USERNAME=*ChangeMe*
-MONGODB_PASSWORD=*ChangeMe*
-MONGODB_DATABASE=*ChangeMe*
+- Get `firebase_secret.json` file and put in directory
 
-MONGODB_HOST=0.0.0.0
-MONGODB_PORT=27017
+- See further steps below based on the task!
 
-APP_HOST=0.0.0.0
-APP_PORT=8000
-APP_ENV=DEV
-FIREBASE_SECRET_PATH=firebase_secret.json
-DEV_USERS_JSON_PATH=dev_user_list.json
+---
+
+### Python setup locally
+
+First run:
+
+```bash
+make mongotestcontainer # Create mongo container
+make envbuild # Create venv
+*Create local.env file*
+make run # Run app
 ```
 
-local.env:
+After:
+
+```bash
+source venv/bin/activate # Go to venv
+make mongotest
+make envupdate # Update venv
+make run # Run app
+```
+
+Create `local.env` file:
 
 ```ini
 # Env
@@ -61,113 +78,40 @@ MONGODB_COLLECTION_TIMEALL=TimeAll
 
 ---
 
-## Firebase config
+### Docker setup locally
 
+Run:
 
-firebase_secret.json:
-
-```json
-{
-  "type": "service_account",
-  "project_id": *ChangeMe*,
-  "private_key_id": *ChangeMe*,
-  "private_key": *ChangeMe*,
-  "client_email": *ChangeMe*,
-  "client_id": *ChangeMe*,
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": *ChangeMe*,
-  "universe_domain": "googleapis.com"
-}
+```bash
+*Create .env file*
+make rundocker # Build container and run
 ```
 
-firebase_secret.env:
+Create `.env` file:
 
 ```ini
-WEB_API_KEY=*ChangeMe* 
-```
+ENV=DOCKER
 
----
+DEBUG=true
+MONGODB_COLLECTION_USER=User
+MONGODB_COLLECTION_CATEGORY=Category
+MONGODB_COLLECTION_INTERVAL=Interval
+MONGODB_COLLECTION_TIMEDAY=TimeDay
+MONGODB_COLLECTION_TIMEALL=TimeAll
 
-## Develop settings json
+MONGO_INITDB_ROOT_USERNAME=*ChangeMe*
+MONGO_INITDB_ROOT_PASSWORD=*ChangeMe*
 
-dev_user_list.json:
+MONGODB_USERNAME=*ChangeMe*
+MONGODB_PASSWORD=*ChangeMe*
+MONGODB_DATABASE=*ChangeMe*
 
-```json
-{
-    "aboba_token": {
-        "token": "aboba_token",
-        "id": "aboba_id",
-        "name": "aboba_name",
-        "email": "aboba@mail.ru"
-    }
-}
+MONGODB_HOST=0.0.0.0
+MONGODB_PORT=27017
 
-```
-
-develop.json:
-
-```json
-{
-    "develop_user_list": [
-        {
-            "id": "aboba_id",
-            "name": "aboba",
-            "active": true,
-            "pic": "not",
-            "email": "aboba@gmail.com",
-            "email_verified": true,
-            "provider": {
-                "type": "GOOGLE",
-                "data": {}
-            }
-        },
-        {
-            "id": "amogus_id",
-            "name": "amogus",
-            "active": true,
-            "pic": "not",
-            "email": "amogus@gmail.com",
-            "email_verified": true,
-            "provider": {
-                "type": "GOOGLE",
-                "data": {}
-            }
-        },
-        {
-            "id": "shrek_id",
-            "name": "shrek",
-            "active": true,
-            "pic": "not",
-            "email": "shrek@gmail.com",
-            "email_verified": true,
-            "provider": {
-                "type": "GOOGLE",
-                "data": {}
-            }
-        }
-    ]
-}
-```
-
----
-
-Run commands on start:
-
-```bash
-make mongotestcontainer # Create mongo container
-make mongotest # Start exist container
-make envbuild # Create venv
-*Create .env file*
-make run # Run app
-```
-
-If venv exist:
-
-```bash
-*In env*
-make envupdate # Update venv
-make run # Run app
-make rundocker # Run app with mongodb
+APP_HOST=0.0.0.0
+APP_PORT=8000
+APP_ENV=DEV
+FIREBASE_SECRET_PATH=firebase_secret.json
+DEV_USERS_JSON_PATH=dev_user_list.json
 ```
