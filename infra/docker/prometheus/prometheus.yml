@@ -1,0 +1,30 @@
+global: # Тут глобальные настройки
+  scrape_interval: 15s # Интервал сбора метриков
+  scrape_timeout: 10s # Время завершения сбора до истечения
+  evaluation_interval: 15s # интервал оценки : как часто следует оценивать правила
+alerting: # Настройки оповещения
+  alertmanagers: # Настройки алертменеджеров
+  - follow_redirects: true # Перенаправления при отправке предупреждений
+    enable_http2: true # Включение http2 при отправке предупреждений диспетчеру алертов
+    scheme: https # схема отправки
+    timeout: 10s # как долго ждать ответа от менеджера
+    api_version: v2 # 
+    static_configs: #
+    - targets: [] # Использование прометея по умолчанию
+scrape_configs: # настройки сбора метрик
+- job_name: prometheus # 
+  honor_timestamps: true # Указатель использования временных меток при очистке задания
+  scrape_interval: 15s # 
+  scrape_timeout: 10s #
+  metrics_path: /metrics #
+  scheme: https #
+  follow_redirects: false # если юрл перенаправляет куда-то в другой url
+  enable_http2: true # если поддерживает приложение http2, то запросы будут быстрее + надёжнее
+  static_configs: #
+  - targets: #
+    - '${PROMETHEUS_HOST}:${PROMETHEUS_PORT}' # - путь прометея
+- job_name: 'fastapi' #
+  scrape_interval: 10s #
+  metrics_path: /metrics # по нашему url будет сбор метрик
+  static_configs: #
+    - targets: ['${APP_HOST}:${APP_PORT}'] 

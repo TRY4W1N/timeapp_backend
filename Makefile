@@ -45,3 +45,7 @@ run:
 .PHONY: rundocker
 rundocker:
 	docker compose -f docker-compose.dev.yaml up --build
+
+.PHONY: rundockermetrics
+rundockermetrics:
+	docker compose -f docker-compose.metrics.yaml up --build
