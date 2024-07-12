@@ -1,0 +1,46 @@
+auth_enabled: false
+
+server:
+  http_listen_port: ${LOKI_PORT}
+  grpc_listen_port: ${LOKI_GRPC_PORT}
+
+
+ingester:
+  wal:
+      dir: "/tmp/wal"
+  lifecycler:
+    address: ${LOKI_HOST} 
+    ring: 
+      replication_factor: 1
+      kvstore:
+        store: inmemory
+  chunk_idle_period: 35m
+  chunk_retain_period: 30m
+
+storage_config:
+  boltdb:
+    directory: /tmp/loki/index
+  filesystem:
+    directory: /tmp/loki/chunks
+
+
+schema_config: 
+  configs:
+    - from: 2020-01-01 
+      store: boltdb 
+      object_store: filesystem 
+      schema: v11
+      index:
+        prefix: index_
+        period: 168h 
+
+# auth_config:
+#   backend: basic
+#   basic_auth:
+#     users:
+#       - username: $LOKI_USERNAME
+#         password: $LOKI_PASSWORD
+
+
+# ruler:
+#   alertmanager_url: $LOKI_ALERT_MANAGER_HOST:$LOKI_ALERT_MANAGER_PORT

@@ -20,7 +20,7 @@ def create_app(config: ConfigBase):
         default_response_class=ORJSONResponse,
     )
     app.include_router(router)
-    setup_middlewares(app)
+    setup_middlewares(app, config)
     setup_exception_handlers(app)
     return app
 

@@ -2,7 +2,8 @@ services:
   app:
     build: 
       context: .
-      target: app-metric
+      target: app
+    container_name: app
     ports:
       - $APP_PORT:$APP_PORT
     command: python -m src.presentation.http.app
@@ -10,6 +11,8 @@ services:
       - .env
     networks:
       - app.network
+    logging:
+      driver: "json-file"
     depends_on:
       - db
     
@@ -32,63 +35,63 @@ services:
       - $PROMETHEUS_PORT:$PROMETHEUS_PORT
     volumes:
       - ./infra/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
-    command: '--config.file=/etc/prometheus/prometheus.yml' 
+    command: 
+      - '--config.file=/etc/prometheus/prometheus.yml' 
     env_file:
       - .env
     depends_on: 
-      - app
+      - grafana
     networks:
       - app.network
 
-#   loki:
-#     image: grafana/loki:latest
-#     container_name: loki
-#     command: 
-#       - -config.file=/etc/loki/loki-config.yaml # make this file with conf
-#       - -config.expand-env=true
-#     hostname: $LOKI_HOST_NAME
-#     expose:
-#       - $LOKI_EXPOSE 
-#     ports:
-#       - $LOKI_PORT:$LOKI_PORT
-#     volumes:
-#       - ./infra/docker/loki/loki-config.yaml:/etc/loki/loki-config.yaml
-#       - loki.data:/tmp/:rw
-#     env_file:
-#       - .env
-#     depends_on:
-#       - grafana
-#     networks:
-#       - grafana.network
+  vector:
+    image: timberio/vector:latest-alpine
+    container_name: vector
+    command: --config /etc/vector/vector_config.yaml
+    volumes:
+      - ./infra/docker/vector/vector_config.yaml:/etc/vector/vector_config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    env_file:
+      - .env
+    depends_on:
+      - loki
+    networks:
+      - grafana.network
+    logging:
+      driver: "json-file"
 
-#   vector:
-#     image: timberio/vector:latest-alpine
-#     container_name: vector
-#     command: --config /etc/vector/vector.toml
-#     expose:
-#       - $VECTOR_EXPOSE 
-#     volumes:
-#       - ./infra/docker/vector/vector.toml:/etc/vector/vector.toml
-#       - /var/run/docker.sock:/var/run/docker.sock:ro
-#     env_file:
-#       - .env
-#     depends_on:
-#       - grafana
-#     networks:
-#       - grafana.network
-#     logging:
-#       driver: "json-file"
-#       options:
-#         max-size: "10m" #wtf
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    command: 
+      - -config.file=/etc/loki/loki_config.yaml
+      - -config.expand-env=true
+    hostname: $LOKI_HOST_NAME
+    expose:
+      - $LOKI_EXPOSE 
+    ports:
+      - $LOKI_PORT:$LOKI_PORT
+    volumes:
+      - loki-data:/tmp/:rw
+      - ./infra/docker/loki/loki_config.yaml:/etc/loki/loki_config.yaml
+    env_file:
+      - .env
+    depends_on:
+      - grafana
+    networks:
+      - grafana.network
 
   grafana:
     image: grafana/grafana:9.5.2
     container_name: grafana
+    command: sudo chmod -R 777 ./infra /etc
+    expose:
+      - $GF_EXPOSE
     ports:
       - $GF_PORT:$GF_PORT
     volumes:
-      - ./infra/docker/grafana:/var/lib/grafana:rw
-      - grafana:/var/lib/grafana
+      - ./infra/docker/grafana/provisioning:/etc/grafana/provisioning:rw
+      - grafana-data-logs:/var/lib/grafana:rw
     environment:
       - GF_SECURITY_ADMIN_USER=$GF_SECURITY_ADMIN_USER
       - GF_SECURITY_ADMIN_PASSWORD=$GF_SECURITY_ADMIN_PASSWORD
@@ -100,24 +103,28 @@ services:
       - app
     env_file:
       - .env
-    user: "0:0" # as root. Change on prod
+    user: "0:0"
     networks:
       - grafana.network
       - app.network
 
 
-
 volumes:  
-  grafana: {}
+  grafana-data-logs: 
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: ./infra/docker/grafana
   db-data:
     driver: local
     name: mongo-data
   db-logs:
     driver: local
     name: mongo-logs
-#   loki.data:
-#     driver: local
-#     name: loki-data
+  loki-data: 
+    driver: local
+    name: loki-logs
 
 networks:
   grafana.network: {}

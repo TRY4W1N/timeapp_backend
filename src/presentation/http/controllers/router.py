@@ -1,5 +1,6 @@
 from dishka.integrations.fastapi import DishkaRoute
 from fastapi import APIRouter
+from starlette_exporter import handle_metrics
 
 from src.presentation.http.common.responses import (
     auth_dependencies,
@@ -12,6 +13,8 @@ from src.presentation.http.controllers.interval.controller import interval_route
 from src.presentation.http.controllers.user.controller import user_router
 
 router = APIRouter(route_class=DishkaRoute, responses={**response_500})
+
+router.add_route(path="/metrics", endpoint=handle_metrics)
 
 router.include_router(
     prefix="/heal",

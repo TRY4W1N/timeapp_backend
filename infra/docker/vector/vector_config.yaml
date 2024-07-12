@@ -1,26 +1,26 @@
 sources:
   docker:
-    type: "docker_logs"
-    docker_host: "unix:///var/run/docker.sock"
-    include_containers:
-      - "app"
+    type: docker_logs
+    docker_host: "/var/run/docker.sock"
+    include_containers: 
+      - app
 
 sinks:
   console:
-    type: "console"
+    type: console
     inputs:
-      - "docker"
+      - docker
     encoding:
       codec: "json"
 
   my_sink_id:
-    type: "loki"
+    type: loki
     inputs:
-      - "docker"
+      - docker
     encoding:
       codec: "json"
     labels:
       event: "log"
       container_name: "{{container_name}}"
-    endpoint: "${LOKI_HOST}:${LOKI_PORT}"
+    endpoint: http://$LOKI_HOST_NAME:$LOKI_PORT
     healthcheck: true
