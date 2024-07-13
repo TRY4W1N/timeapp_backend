@@ -27,9 +27,8 @@ async def interval_track_start(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseIntervalTrackStartType],
     category_uuid: CategoryId,
-    started_at: int,
 ) -> IntervalStartSchema:
-    result = await uc.execute(user=user, category_uuid=category_uuid, started_at=started_at)
+    result = await uc.execute(user=user, category_uuid=category_uuid)
     return IntervalStartSchema.from_obj(obj=result)
 
 
@@ -38,9 +37,8 @@ async def interval_track_stop(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseIntervalTrackStopType],
     category_uuid: CategoryId,
-    stopped_at: int,
 ) -> IntervalStopSchema:
-    result = await uc.execute(user=user, category_uuid=category_uuid, stopped_at=stopped_at)
+    result = await uc.execute(user=user, category_uuid=category_uuid)
     return IntervalStopSchema.from_obj(obj=result)
 
 

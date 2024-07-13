@@ -1,3 +1,5 @@
+from datetime import datetime
+
 from pymongo import ReturnDocument
 
 from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
@@ -24,7 +26,9 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         self.interval_collection = interval_collection
         self.category_collection = category_collection
 
-    async def start(self, user: UserEntity, category_uuid: CategoryId, started_at: int) -> IntervalStartDTO:
+    async def start(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStartDTO:
+        started_at = int(datetime.now().timestamp())
+
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
         if category is None:
@@ -40,9 +44,10 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         )
         interval_data_list = await interval_data_query.to_list(length=None)
         if len(interval_data_list) != 0:
-            for interval in interval_data_list:
-                fltr = {"uuid": interval["uuid"]}
-                await self.interval_collection.find_one_and_update(filter=fltr, update={"$set": {"end_at": started_at}})
+            query_filter = [interval["uuid"] for interval in interval_data_list]
+            await self.interval_collection.update_many(
+                filter={"uuid": {"$in": query_filter}}, update={"$set": {"end_at": started_at}}
+            )
 
         model = IntervalModel(
             uuid=self.gen_uuid(),
@@ -62,7 +67,9 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
             interval_uuid=IntervalId(created_model["uuid"]),
         )
 
-    async def stop(self, user: UserEntity, category_uuid: CategoryId, stopped_at: int) -> IntervalStopDTO:
+    async def stop(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStopDTO:
+        stopped_at = int(datetime.now().timestamp())
+
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
         if category is None:

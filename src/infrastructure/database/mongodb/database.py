@@ -2,7 +2,7 @@ from typing import Protocol
 
 from motor.motor_asyncio import AsyncIOMotorCollection, AsyncIOMotorDatabase
 
-from src.domain.exception.base import CollectionNotFound
+from src.infrastructure.database.mongodb.exception.base import CollectionNotFound
 
 
 class DatabaseMongo(Protocol):

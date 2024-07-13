@@ -15,31 +15,28 @@ from src.tests.dataloader import Dataloader
 async def test_interval_stop_ok(dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway):
     print()
     # Arrange
-    stopped_at = datetime.now()
-    timestamp = int(round(stopped_at.timestamp()))
+
     category = await dl.category_loader.create(user_uuid=fx_user.uuid)
     target_interval = await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid)
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid)
 
     # Act
-    res = await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid), stopped_at=timestamp)
+    res = await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid))
 
     # Assert
     assert res.user_uuid == fx_user.uuid
-    assert res.category_uuid == CategoryId(category.uuid)
-    assert res.interval_uuid == IntervalId(target_interval.uuid)
+    assert res.category_uuid == category.uuid
+    assert res.interval_uuid == target_interval.uuid
 
 
 # pytest src/tests/ctx/interval/test_gateway.py::test_interval_stop_category_not_found_err -v -s
 async def test_interval_stop_category_not_found_err(fx_user: UserEntity, gateway_interval: IntervalGateway):
     # Arrange
     category_uuid_not_exist = CategoryId("-1")
-    stopped_at = datetime.now()
-    timestamp = int(round(stopped_at.timestamp()))
 
     # Assert
     with pytest.raises(EntityNotFound) as err:
-        await gateway_interval.stop(user=fx_user, category_uuid=category_uuid_not_exist, stopped_at=timestamp)
+        await gateway_interval.stop(user=fx_user, category_uuid=category_uuid_not_exist)
     assert category_uuid_not_exist in str(err.value)
 
 
@@ -48,15 +45,13 @@ async def test_interval_stop_not_updated(dl: Dataloader, fx_user: UserEntity, ga
     print()
     # Arrange
     category = await dl.category_loader.create(user_uuid=fx_user.uuid)
-    stopped_at = datetime.now()
-    timestamp = int(round(stopped_at.timestamp()))
 
     mock_category = await dl.category_loader.create(user_uuid=fx_user.uuid)
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=mock_category.uuid)
 
     # Assert
     with pytest.raises(EntityNotFound) as err:
-        await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid), stopped_at=timestamp)
+        await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid))
     assert f"{category.uuid}" in str(err.value)
 
 
@@ -80,7 +75,7 @@ async def test_interval_clear_ok(
     res = await gateway_interval.clear(user=fx_user, category_uuid=CategoryId(category.uuid))
 
     # Assert
-    assert res.category_uuid == CategoryId(category.uuid)
+    assert res.category_uuid == category.uuid
     assert res.interval_count == arrange_interval_count
     assert res.user_uuid == fx_user.uuid
 
@@ -90,16 +85,14 @@ async def test_interval_start_ok(dl: Dataloader, fx_user: UserEntity, gateway_in
     print()
     # Arrange
     category = await dl.category_loader.create(user_uuid=fx_user.uuid)
-    started_at = datetime.now()
-    timestamp = int(round(started_at.timestamp()))
 
     await dl.category_loader.create(user_uuid=fx_user.uuid)
 
     # Act
-    res = await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid), started_at=timestamp)
+    res = await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid))
 
     # Assert
-    assert res.category_uuid == CategoryId(category.uuid)
+    assert res.category_uuid == category.uuid
     assert res.interval_uuid
     assert res.user_uuid == fx_user.uuid
 
@@ -111,22 +104,21 @@ async def test_interval_start_started_interval_already_exist(
     print()
     # Arrange
     category = await dl.category_loader.create(user_uuid=fx_user.uuid)
-    started_at = datetime.now()
-    timestamp = int(round(started_at.timestamp()))
+    started_at = int(datetime.now().timestamp())
 
     await dl.category_loader.create(user_uuid=fx_user.uuid)
-    mock_timestamp = timestamp - 10
+    mock_timestamp = started_at - 10
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=mock_timestamp)
-    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=timestamp)
+    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=started_at)
 
     # Act
-    res = await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid), started_at=timestamp)
+    res = await gateway_interval.start(user=fx_user, category_uuid=CategoryId(category.uuid))
 
     # Assert
     fltr = {"category_uuid": category.uuid, "user_uuid": fx_user.uuid, "end_at": {"$eq": None}}
     started_intervals_list = await dl.interval_loader.get_lst(fltr=fltr)
     assert len(started_intervals_list) == 1
-    assert res.category_uuid == CategoryId(category.uuid)
+    assert res.category_uuid == category.uuid
     assert res.interval_uuid
     assert res.user_uuid == fx_user.uuid
 
@@ -135,10 +127,8 @@ async def test_interval_start_started_interval_already_exist(
 async def test_interval_start_category_not_find(dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway):
     # Arrange
     category_id_not_exist = CategoryId("-1")
-    started_at = datetime.now()
-    timestamp = int(round(started_at.timestamp()))
 
     # Assert
     with pytest.raises(EntityNotFound) as err:
-        await gateway_interval.start(user=fx_user, category_uuid=category_id_not_exist, started_at=timestamp)
+        await gateway_interval.start(user=fx_user, category_uuid=category_id_not_exist)
     assert category_id_not_exist in str(err.value)

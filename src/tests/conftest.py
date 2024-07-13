@@ -47,9 +47,7 @@ async def dl(dicon: AsyncContainer) -> AsyncGenerator[Dataloader, None]:
 @pytest.fixture(scope="function")
 async def fx_user(dl: Dataloader) -> AsyncGenerator[UserEntity, None]:
     user_model = await dl.user_loader.create()
-    yield UserEntity(
-        uuid=UserId(user_model.uuid), email=user_model.email, name=user_model.name, time_zone=user_model.time_zone
-    )
+    yield UserEntity(uuid=UserId(user_model.uuid), email=user_model.email, name=user_model.name)
 
 
 @pytest.fixture(scope="function")

@@ -72,11 +72,11 @@ class UserLoader(EntityLoader[UserModel]):
         if created_model is None:
             raise Exception("Fail")
         data = dict(**created_model)
-        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], time_zone=data["time_zone"])
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"])
 
     async def get(self, fltr: dict) -> UserModel:
         data = await self._get(fltr=fltr)
-        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"], time_zone=data["utc"])
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"])
 
 
 class IntervalLoader(EntityLoader[IntervalModel]):

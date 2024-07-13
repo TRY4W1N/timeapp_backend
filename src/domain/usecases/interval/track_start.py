@@ -10,8 +10,6 @@ class UsecaseIntervalTrackStart(Usecase):
     def __init__(self, interval_gateway: IntervalGateway) -> None:
         self.interval_gateway = interval_gateway
 
-    async def execute(self, user: UserEntity, category_uuid: CategoryId, started_at: int) -> IntervalStartDTO:
-        interval_start = await self.interval_gateway.start(
-            user=user, category_uuid=category_uuid, started_at=started_at
-        )
+    async def execute(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStartDTO:
+        interval_start = await self.interval_gateway.start(user=user, category_uuid=category_uuid)
         return interval_start

@@ -13,7 +13,7 @@ async def test_start_interval_ok(
     print()
     # Arrange
     uc = usecase_interval_track_start
-    category_model = await dl.category_loader.create()
+    category_model = await dl.category_loader.create(user_uuid=fx_user.uuid)
 
     category_model_2 = await dl.category_loader.create()
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model_2.uuid)
@@ -22,7 +22,7 @@ async def test_start_interval_ok(
     timestamp = int(round(started_at.timestamp()))
 
     # Act
-    res = await uc.execute(user=fx_user, category_uuid=CategoryId(category_model.uuid), started_at=timestamp)
+    res = await uc.execute(user=fx_user, category_uuid=CategoryId(category_model.uuid))
 
     # Assert
     assert res.user_uuid == fx_user.uuid

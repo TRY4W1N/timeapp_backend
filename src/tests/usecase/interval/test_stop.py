@@ -14,7 +14,7 @@ async def test_stop_interval_ok(
     print()
     # Arrange
     uc = usecase_interval_track_stop
-    category_model = await dl.category_loader.create()
+    category_model = await dl.category_loader.create(user_uuid=fx_user.uuid)
     interval_model = await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
 
     category_model_2 = await dl.category_loader.create()
@@ -24,7 +24,7 @@ async def test_stop_interval_ok(
     timestamp = int(round(started_at.timestamp()))
 
     # Act
-    res = await uc.execute(user=fx_user, category_uuid=CategoryId(category_model.uuid), stopped_at=timestamp)
+    res = await uc.execute(user=fx_user, category_uuid=CategoryId(category_model.uuid))
 
     stopped_interval = await dl.interval_loader.get(
         fltr={"category_uuid": category_model.uuid, "user_uuid": fx_user.uuid}
