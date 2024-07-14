@@ -22,5 +22,5 @@ sinks:
     labels:
       event: "log"
       container_name: "{{container_name}}"
-    endpoint: http://$LOKI_HOST_NAME:$LOKI_PORT
+    endpoint: http://loki:3100
     healthcheck: true

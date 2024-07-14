@@ -7,10 +7,9 @@ services:
     ports:
       - $APP_PORT:$APP_PORT
     command: python -m src.presentation.http.app
+    restart: unless-stopped
     env_file:
       - .env
-    networks:
-      - app.network
     logging:
       driver: "json-file"
     depends_on:
@@ -18,7 +17,7 @@ services:
     
   db:
     image: mongo:latest
-    restart: always
+    restart: unless-stopped
     ports:
       - $MONGODB_PORT:$MONGODB_PORT
     env_file:
@@ -30,92 +29,62 @@ services:
 
   prometheus:
     image: prom/prometheus
+    restart: unless-stopped
     container_name: prometheus
     ports:
-      - $PROMETHEUS_PORT:$PROMETHEUS_PORT
+      - 9090:9090
     volumes:
       - ./infra/docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     command: 
       - '--config.file=/etc/prometheus/prometheus.yml' 
-    env_file:
-      - .env
-    depends_on: 
-      - grafana
-    networks:
-      - app.network
 
   vector:
     image: timberio/vector:latest-alpine
+    restart: unless-stopped
     container_name: vector
     command: --config /etc/vector/vector_config.yaml
     volumes:
       - ./infra/docker/vector/vector_config.yaml:/etc/vector/vector_config.yaml:ro
       - /var/run/docker.sock:/var/run/docker.sock:ro
-    env_file:
-      - .env
-    depends_on:
-      - loki
-    networks:
-      - grafana.network
     logging:
       driver: "json-file"
 
   loki:
-    image: grafana/loki:latest
+    image: grafana/loki:2.8.2
+    restart: unless-stopped
     container_name: loki
+    hostname: loki
     command: 
       - -config.file=/etc/loki/loki_config.yaml
       - -config.expand-env=true
-    hostname: $LOKI_HOST_NAME
     expose:
-      - $LOKI_EXPOSE 
+      - 3100
     ports:
-      - $LOKI_PORT:$LOKI_PORT
+      - 3100:3100
     volumes:
-      - loki-data:/tmp/:rw
       - ./infra/docker/loki/loki_config.yaml:/etc/loki/loki_config.yaml
-    env_file:
-      - .env
-    depends_on:
-      - grafana
-    networks:
-      - grafana.network
+      - loki-data:/tmp/:rw
 
   grafana:
     image: grafana/grafana:9.5.2
+    restart: unless-stopped
     container_name: grafana
-    command: sudo chmod -R 777 ./infra /etc
     expose:
-      - $GF_EXPOSE
+      - 3000
     ports:
-      - $GF_PORT:$GF_PORT
+      - 3000:3000
     volumes:
       - ./infra/docker/grafana/provisioning:/etc/grafana/provisioning:rw
-      - grafana-data-logs:/var/lib/grafana:rw
+      - grafana-data:/var/lib/grafana
     environment:
       - GF_SECURITY_ADMIN_USER=$GF_SECURITY_ADMIN_USER
       - GF_SECURITY_ADMIN_PASSWORD=$GF_SECURITY_ADMIN_PASSWORD
       - GF_USERS_ALLOW_SIGN_UP=false
-      - VIRTUAL_HOST=$GF_VIRTUAL_HOST 
-      - NETWORK_ACCESS=internal 
-      - VIRTUAL_PORT=$GF_VIRTUAL_PORT 
-    depends_on:
-      - app
     env_file:
       - .env
-    user: "0:0"
-    networks:
-      - grafana.network
-      - app.network
 
 
-volumes:  
-  grafana-data-logs: 
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: ./infra/docker/grafana
+volumes:
   db-data:
     driver: local
     name: mongo-data
@@ -124,8 +93,7 @@ volumes:
     name: mongo-logs
   loki-data: 
     driver: local
-    name: loki-logs
-
-networks:
-  grafana.network: {}
-  app.network: {}
+    name: loki-data
+  grafana-data:
+    driver: local
+    name: grafana-data
