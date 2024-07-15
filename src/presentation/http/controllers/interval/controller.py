@@ -9,6 +9,10 @@ from src.infrastructure.di.alias import (
     UsecaseIntervalTrackStopType,
     UserEntityType,
 )
+from src.presentation.http.common.responses import (
+    response_400_not_created,
+    response_404,
+)
 from src.presentation.http.controllers.interval.schemas import (
     IntervalClearSchema,
     IntervalStartSchema,
@@ -18,7 +22,7 @@ from src.presentation.http.controllers.interval.schemas import (
 interval_router = APIRouter(route_class=DishkaRoute)
 
 
-@interval_router.post("/start/{category_uuid}")
+@interval_router.post("/start/{category_uuid}", responses={**response_400_not_created, **response_404})
 async def interval_track_start(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseIntervalTrackStartType],
@@ -28,7 +32,7 @@ async def interval_track_start(
     return IntervalStartSchema.from_obj(obj=result)
 
 
-@interval_router.post("/stop/{category_uuid}")
+@interval_router.patch("/stop/{category_uuid}", responses={**response_404})
 async def interval_track_stop(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseIntervalTrackStopType],
@@ -38,7 +42,7 @@ async def interval_track_stop(
     return IntervalStopSchema.from_obj(obj=result)
 
 
-@interval_router.delete("/clear/{category_uuid}")
+@interval_router.delete("/clear/{category_uuid}", responses={**response_404})
 async def interval_clear_by_category(
     user: FromDishka[UserEntityType],
     uc: FromDishka[UsecaseIntervalClearType],

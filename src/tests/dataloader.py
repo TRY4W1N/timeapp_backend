@@ -56,6 +56,7 @@ class UserLoader(EntityLoader[UserModel]):
             name = uuid_gen()
         if email is None:
             email = uuid_gen()
+
         insert_result = await self._collection.insert_one(
             dict(
                 uuid=uuid,
@@ -68,19 +69,11 @@ class UserLoader(EntityLoader[UserModel]):
         if created_model is None:
             raise Exception("Fail")
         data = dict(**created_model)
-        return UserModel(
-            uuid=data["uuid"],
-            name=data["name"],
-            email=data["email"],
-        )
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"])
 
     async def get(self, fltr: dict) -> UserModel:
         data = await self._get(fltr=fltr)
-        return UserModel(
-            uuid=data["uuid"],
-            name=data["name"],
-            email=data["email"],
-        )
+        return UserModel(uuid=data["uuid"], name=data["name"], email=data["email"])
 
 
 class IntervalLoader(EntityLoader[IntervalModel]):

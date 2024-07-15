@@ -23,3 +23,4 @@ class IntervalStopDTO:
 class IntervalClearDTO:
     user_uuid: UserId
     category_uuid: CategoryId
+    interval_count: int
