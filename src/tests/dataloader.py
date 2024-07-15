@@ -49,7 +49,6 @@ class UserLoader(EntityLoader[UserModel]):
         uuid: str | None = None,
         name: str | None = None,
         email: str | None = None,
-        time_zone: str | None = None,
     ) -> UserModel:
         if uuid is None:
             uuid = user_uuid_gen()
@@ -57,14 +56,12 @@ class UserLoader(EntityLoader[UserModel]):
             name = uuid_gen()
         if email is None:
             email = uuid_gen()
-        if time_zone is None:
-            utc = "Europe/Prague"
+
         insert_result = await self._collection.insert_one(
             dict(
                 uuid=uuid,
                 name=name,
                 email=email,
-                time_zone=time_zone,
             )
         )
         assert insert_result.acknowledged
