@@ -11,6 +11,7 @@ from src.infrastructure.database.mongodb.database import DatabaseMongo
 from src.infrastructure.database.mongodb.models import (
     CategoryModel,
     IntervalModel,
+    TimeAllModel,
     UserModel,
 )
 
@@ -20,6 +21,7 @@ uuid_gen = lambda: str(uuid4())
 user_uuid_gen = lambda: f"user_{uuid_gen()}"
 category_uuid_gen = lambda: f"category_{uuid_gen()}"
 interval_uuid_gen = lambda: f"interval_{uuid_gen()}"
+time_all_uuid_gen = lambda: f"time_all_{uuid_gen()}"
 
 
 class EntityLoader(ABC, Generic[T]):
@@ -122,6 +124,36 @@ class IntervalLoader(EntityLoader[IntervalModel]):
         return [IntervalModel.from_dict(dict(**model)) for model in models]
 
 
+class TimeAllLoader(EntityLoader[TimeAllModel]):
+    async def create(
+        self,
+        uuid: str | None = None,
+        user_uuid: str | None = None,
+        category_uuid: str | None = None,
+        total_time: int | None = None,
+    ) -> TimeAllModel:
+        if uuid is None:
+            uuid = time_all_uuid_gen()
+        if user_uuid is None:
+            user_uuid = user_uuid_gen()
+        if category_uuid is None:
+            category_uuid = category_uuid_gen()
+        if total_time is None:
+            total_time = int(datetime.now().timestamp())
+        insert_result = await self._collection.insert_one(
+            TimeAllModel(uuid=uuid, user_uuid=user_uuid, category_uuid=category_uuid, total_time=total_time).to_dict()
+        )
+        created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
+        if created_model is None:
+            raise Exception("Fail")
+        model = TimeAllModel.from_dict(dict(**created_model))
+        return model
+
+    async def get(self, fltr: dict) -> TimeAllModel:
+        data = await self._get(fltr=fltr)
+        return TimeAllModel.from_dict(data=data)
+
+
 class CategoryLoader(EntityLoader[CategoryModel]):
 
     async def create_many(self, models: list[CategoryModel]) -> list[CategoryModel]:
@@ -178,6 +210,11 @@ class Dataloader:
     def __init__(self, database: DatabaseMongo, config: ConfigBase) -> None:
         self._database = database
         self._config = config
+
+    @property
+    def time_all_loader(self) -> TimeAllLoader:
+        collection = self._database.get_collection(name=self._config.MONGODB_COLLECTION_TIMEALL)
+        return TimeAllLoader(collection=collection, database=self._database, config=self._config)
 
     @property
     def interval_loader(self) -> IntervalLoader:

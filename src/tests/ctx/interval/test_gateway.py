@@ -5,7 +5,6 @@ import pytest
 from src.domain.common.exception.base import EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
-from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.entity import UserEntity
 from src.tests.conftest import dl, fx_user, gateway_interval
 from src.tests.dataloader import Dataloader

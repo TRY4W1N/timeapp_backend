@@ -8,6 +8,7 @@ from pytest_mock import MockerFixture
 from src.domain.ctx.auth.dto import UserIdentityDTO
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
+from src.domain.ctx.time_all.interface.gateway import TimeAllGateway
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.types import UserId
 from src.infrastructure.config import ConfigBase
@@ -58,6 +59,11 @@ async def gateway_category(dicon: AsyncContainer) -> AsyncGenerator[CategoryGate
 @pytest.fixture(scope="function")
 async def gateway_interval(dicon: AsyncContainer) -> AsyncGenerator[IntervalGateway, None]:
     yield await dicon.get(IntervalGateway, component="GATEWAY")
+
+
+@pytest.fixture(scope="function")
+async def gateway_time_all(dicon: AsyncContainer) -> AsyncGenerator[TimeAllGateway, None]:
+    yield await dicon.get(TimeAllGateway, component="GATEWAY")
 
 
 @pytest.fixture(scope="function")
