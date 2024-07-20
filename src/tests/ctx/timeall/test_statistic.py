@@ -1,13 +1,13 @@
 import pytest
 
 from src.domain.common.exception.base import EntityNotFound
-from src.domain.ctx.time_all.interface.gateway import TimeAllGateway
+from src.domain.ctx.statistic.interface.gateway import StatisticGateway
 from src.domain.ctx.user.entity import UserEntity
 from src.tests.dataloader import Dataloader
 
 
-# pytest src/tests/ctx/timeall/test_time_all.py::test_cat_lst -v -s
-async def test_get_category_statistic_ok(dl: Dataloader, fx_user: UserEntity, gateway_time_all: TimeAllGateway):
+# pytest src/tests/ctx/timeall/test_statistic.py::test_get_category_statistic_ok -v -s
+async def test_get_category_statistic_ok(dl: Dataloader, fx_user: UserEntity, gateway_time_all: StatisticGateway):
     print()
     # Arrange
 
@@ -18,9 +18,9 @@ async def test_get_category_statistic_ok(dl: Dataloader, fx_user: UserEntity, ga
     # Category 2 open interval with closed intervals
     category_2 = await dl.category_loader.create(user_uuid=fx_user.uuid)
     await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_2.uuid, started_at=2000)
-    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_2.uuid, started_at=10, end_at=30)
+    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_2.uuid, started_at=10, end_at=50)
     await dl.time_all_loader.create(user_uuid=fx_user.uuid, category_uuid=category_2.uuid, total_time=1000)
-    category_2_total_time = 1020
+    category_2_total_time = 1040
 
     # Category 3 only closed intervals
     category_3 = await dl.category_loader.create(user_uuid=fx_user.uuid)
@@ -28,8 +28,7 @@ async def test_get_category_statistic_ok(dl: Dataloader, fx_user: UserEntity, ga
     await dl.time_all_loader.create(user_uuid=fx_user.uuid, category_uuid=category_3.uuid, total_time=200)
     category_3_total_time = 220
 
-    arrange_category_set_uuid = set([category_3.uuid, category_2.uuid, category_1.uuid])
-    arrange_time_all_categories = {
+    arrange_categories_time_all = {
         category_1.uuid: category_1_total_time,
         category_2.uuid: category_2_total_time,
         category_3.uuid: category_3_total_time,
@@ -40,18 +39,18 @@ async def test_get_category_statistic_ok(dl: Dataloader, fx_user: UserEntity, ga
 
     # Assert
     res_percent_sum = sum((time_percent.time_percent for time_percent in res.category_list), 0)
-    res_category_set_uuid = {category.category_uuid for category in res.category_list}
-    res_time_all_categories = {category.category_uuid: category.total_time for category in res.category_list}
+    res_category_uuid_set = {category.category_uuid for category in res.category_list}
+    res_categories_time_all = {category.category_uuid: category.total_time for category in res.category_list}
 
     assert res_percent_sum == 100
-    assert res_category_set_uuid == arrange_category_set_uuid
-    assert res_time_all_categories == arrange_time_all_categories
+    assert res_category_uuid_set == set(arrange_categories_time_all.keys())
+    assert res_categories_time_all == arrange_categories_time_all
     assert res.user_uuid == fx_user.uuid
 
 
-# pytest src/tests/ctx/timeall/test_time_all.py::test_get_categories_statistic -v -s
+# pytest src/tests/ctx/timeall/test_statistic.py::test_get_category_statistic_category_not_found -v -s
 async def test_get_category_statistic_category_not_found(
-    dl: Dataloader, fx_user: UserEntity, gateway_time_all: TimeAllGateway
+    dl: Dataloader, fx_user: UserEntity, gateway_time_all: StatisticGateway
 ):
     print()
     # Act
@@ -61,9 +60,9 @@ async def test_get_category_statistic_category_not_found(
     assert f"{fx_user.uuid}" in str(err.value)
 
 
-# pytest src/tests/ctx/timeall/test_time_all.py::test_get_category_statistic_categories_total_time_0 -v -s
+# pytest src/tests/ctx/timeall/test_statistic.py::test_get_category_statistic_categories_total_time_0 -v -s
 async def test_get_category_statistic_categories_total_time_0(
-    dl: Dataloader, fx_user: UserEntity, gateway_time_all: TimeAllGateway
+    dl: Dataloader, fx_user: UserEntity, gateway_time_all: StatisticGateway
 ):
     print()
     # Arrange

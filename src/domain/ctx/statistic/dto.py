@@ -5,13 +5,13 @@ from src.domain.ctx.user.interface.types import UserId
 
 
 @dataclass
-class CategoryTimeStatistic:
+class CategoryTimeStatisticDTO:
     category_uuid: CategoryId
     total_time: int
     time_percent: float
 
 
 @dataclass
-class ListCategoryTimeStatistic:
+class ListCategoryTimeStatisticDTO:
     user_uuid: UserId
-    category_list: list[CategoryTimeStatistic]
+    category_list: list[CategoryTimeStatisticDTO]
