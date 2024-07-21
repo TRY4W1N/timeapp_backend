@@ -2,6 +2,8 @@ import asyncio
 
 import uvicorn
 from dishka.integrations.fastapi import setup_dishka
+from prometheus_client import make_asgi_app
+
 from fastapi import FastAPI
 from fastapi.responses import ORJSONResponse
 
@@ -22,6 +24,9 @@ def create_app(config: ConfigBase):
     app.include_router(router)
     setup_middlewares(app, config)
     setup_exception_handlers(app)
+    
+    metrics_app = make_asgi_app()
+    app.mount("/metrics", metrics_app)
     return app
 
 

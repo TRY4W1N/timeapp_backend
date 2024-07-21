@@ -8,14 +8,14 @@ from starlette_exporter import PrometheusMiddleware
 from src.infrastructure.config import ConfigBase
 
 
-def set_prometheus_labels(config: ConfigBase) -> dict:
-    labels = {
-        "APP_PORT": config.APP_PORT,
-        "APP_HOST": config.APP_HOST,
-        "DEBUG": config.DEBUG,
-        "APP_ENV": config.APP_ENV,
-    }
-    return labels
+# def set_prometheus_labels(config: ConfigBase) -> dict:
+#     labels = {
+#         "APP_PORT": config.APP_PORT,
+#         "APP_HOST": config.APP_HOST,
+#         "DEBUG": config.DEBUG,
+#         "APP_ENV": config.APP_ENV,
+#     }
+#     return labels
 
 
 async def set_request_id_middleware(
@@ -30,10 +30,10 @@ async def set_request_id_middleware(
 def setup_middlewares(app: FastAPI, config: ConfigBase) -> None:
     app.add_middleware(BaseHTTPMiddleware, dispatch=set_request_id_middleware)
 
-    app.add_middleware(
-        PrometheusMiddleware,
-        app_name=config.APP_NAME,
-        labels=set_prometheus_labels(config=config),
-        prefix="starlette_exporter",
-        always_use_int_status=False,
-    )
+    # app.add_middleware(
+    #     PrometheusMiddleware,
+    #     app_name=config.APP_NAME,
+    #     labels=set_prometheus_labels(config=config),
+    #     prefix="starlette_exporter",
+    #     always_use_int_status=False,
+    # )
