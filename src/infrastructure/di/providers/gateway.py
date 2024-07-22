@@ -4,15 +4,29 @@ from dishka import Provider, Scope, provide
 
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
+from src.domain.ctx.statistic.interface.gateway import StatisticGateway
 from src.domain.ctx.user.interface.gateway import UserGateway
 from src.infrastructure.database.mongodb.gateways.category import CategoryGatewayMongo
 from src.infrastructure.database.mongodb.gateways.interval import IntervalGatewayMongo
+from src.infrastructure.database.mongodb.gateways.statistic import StatisticGatewayMongo
 from src.infrastructure.database.mongodb.gateways.user import UserGatewayMongo
 from src.infrastructure.di.alias import ConfigType, DatabaseMongoType
 
 
 class GatewayProvider(Provider):
     component = "GATEWAY"
+
+    @provide(scope=Scope.REQUEST)
+    async def get_statistic(self, database: DatabaseMongoType, config: ConfigType) -> AsyncIterable[StatisticGateway]:
+        category_collection = database.get_collection(config.MONGODB_COLLECTION_CATEGORY)
+        interval_collection = database.get_collection(config.MONGODB_COLLECTION_INTERVAL)
+        time_all_collection = database.get_collection(config.MONGODB_COLLECTION_TIMEALL)
+        gateway = StatisticGatewayMongo(
+            category_collection=category_collection,
+            interval_collection=interval_collection,
+            time_all_collection=time_all_collection,
+        )
+        yield gateway
 
     @provide(scope=Scope.REQUEST)
     async def get_category(self, database: DatabaseMongoType, config: ConfigType) -> AsyncIterable[CategoryGateway]:

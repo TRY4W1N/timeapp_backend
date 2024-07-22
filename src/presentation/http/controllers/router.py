@@ -9,6 +9,7 @@ from src.presentation.http.common.responses import (
 from src.presentation.http.controllers.category.controller import category_router
 from src.presentation.http.controllers.heal.controller import hs_router
 from src.presentation.http.controllers.interval.controller import interval_router
+from src.presentation.http.controllers.statistic.controller import statistic_router
 from src.presentation.http.controllers.user.controller import user_router
 
 router = APIRouter(route_class=DishkaRoute, responses={**response_500})
@@ -37,6 +38,13 @@ router.include_router(
     prefix="/interval",
     tags=["Interval"],
     router=interval_router,
+    dependencies=[*auth_dependencies],
+    responses={**response_401},
+)
+router.include_router(
+    prefix="/statistic",
+    tags=["Statistic"],
+    router=statistic_router,
     dependencies=[*auth_dependencies],
     responses={**response_401},
 )
