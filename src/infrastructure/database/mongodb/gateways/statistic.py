@@ -66,9 +66,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
 
         category_time_total_dict: dict[str, int] = dict()
         for key in category_dict:
-            category_time_total_dict[key] = (
-                category_dict[key] + time_all_dict.get(key, 0) + interval_dict.get(key, 0)
-            )
+            category_time_total_dict[key] = category_dict[key] + time_all_dict.get(key, 0) + interval_dict.get(key, 0)
 
         statistic_time_total = sum(value for value in category_time_total_dict.values())
         res = ListCategoryTimeStatisticDTO(user_uuid=user.uuid, category_list=[])

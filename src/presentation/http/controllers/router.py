@@ -9,8 +9,8 @@ from src.presentation.http.common.responses import (
 from src.presentation.http.controllers.category.controller import category_router
 from src.presentation.http.controllers.heal.controller import hs_router
 from src.presentation.http.controllers.interval.controller import interval_router
-from src.presentation.http.controllers.user.controller import user_router
 from src.presentation.http.controllers.statistic.controller import statistic_router
+from src.presentation.http.controllers.user.controller import user_router
 
 router = APIRouter(route_class=DishkaRoute, responses={**response_500})
 
