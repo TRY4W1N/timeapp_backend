@@ -130,7 +130,7 @@ class TimeAllLoader(EntityLoader[TimeAllModel]):
         uuid: str | None = None,
         user_uuid: str | None = None,
         category_uuid: str | None = None,
-        total_time: int | None = None,
+        time_total: int | None = None,
     ) -> TimeAllModel:
         if uuid is None:
             uuid = time_all_uuid_gen()
@@ -138,10 +138,10 @@ class TimeAllLoader(EntityLoader[TimeAllModel]):
             user_uuid = user_uuid_gen()
         if category_uuid is None:
             category_uuid = category_uuid_gen()
-        if total_time is None:
-            total_time = int(datetime.now().timestamp())
+        if time_total is None:
+            time_total = int(datetime.now().timestamp())
         insert_result = await self._collection.insert_one(
-            TimeAllModel(uuid=uuid, user_uuid=user_uuid, category_uuid=category_uuid, total_time=total_time).to_dict()
+            TimeAllModel(uuid=uuid, user_uuid=user_uuid, category_uuid=category_uuid, time_total=time_total).to_dict()
         )
         created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
         if created_model is None:

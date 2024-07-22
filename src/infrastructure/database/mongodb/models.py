@@ -89,7 +89,7 @@ class TimeAllModel(Model):
     uuid: str
     user_uuid: str
     category_uuid: str
-    total_time: int
+    time_total: int
 
     @classmethod
     def from_dict(cls, data: dict) -> "TimeAllModel":
@@ -97,5 +97,5 @@ class TimeAllModel(Model):
             uuid=data["uuid"],
             user_uuid=data["user_uuid"],
             category_uuid=data["category_uuid"],
-            total_time=data["total_time"],
+            time_total=data["time_total"],
         )

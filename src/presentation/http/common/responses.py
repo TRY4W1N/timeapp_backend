@@ -51,16 +51,6 @@ response_400_not_created = {
 #         },
 #     }
 # }
-# response_404 = {
-#     status.HTTP_404_NOT_FOUND: {
-#         "model": ErrorSchema,
-#         "content": {
-#             "application/json": {
-#                 "example": {"error_type": "EntityNotFound", "msg": "Some entity not found.."},
-#             }
-#         },
-#     }
-# }
 response_500 = {
     status.HTTP_500_INTERNAL_SERVER_ERROR: {
         "model": ErrorSchema,

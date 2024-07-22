@@ -41,7 +41,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
                             "user_uuid": "$user_uuid",
                             "category_uuid": "$category_uuid",
                         },
-                        "total_time": {"$sum": {"$subtract": ["$end_at", "$started_at"]}},
+                        "time_total": {"$sum": {"$subtract": ["$end_at", "$started_at"]}},
                     },
                 },
                 {
@@ -49,7 +49,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
                         "_id": 0,
                         "user_uuid": "$_id.user_uuid",
                         "category_uuid": "$_id.category_uuid",
-                        "total_time": 1,
+                        "time_total": 1,
                     }
                 },
             ]
@@ -61,26 +61,23 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
         )
         time_all_res = await time_all_query.to_list(length=None)
 
-        interval_dict = {item["category_uuid"]: item["total_time"] for item in interval_res}
-        time_all_dict = {item["category_uuid"]: item["total_time"] for item in time_all_res}
+        interval_dict = {item["category_uuid"]: item["time_total"] for item in interval_res}
+        time_all_dict = {item["category_uuid"]: item["time_total"] for item in time_all_res}
 
-        category_total_time_dict: dict[str, int] = dict()
-        for key in set(category_dict):
-            category_total_time_dict[key] = (
-                category_dict.get(key, 0) + time_all_dict.get(key, 0) + interval_dict.get(key, 0)
+        category_time_total_dict: dict[str, int] = dict()
+        for key in category_dict:
+            category_time_total_dict[key] = (
+                category_dict[key] + time_all_dict.get(key, 0) + interval_dict.get(key, 0)
             )
 
-        statistic_total_time = sum(value for value in category_total_time_dict.values())
+        statistic_time_total = sum(value for value in category_time_total_dict.values())
         res = ListCategoryTimeStatisticDTO(user_uuid=user.uuid, category_list=[])
 
-        for category, total_time in category_total_time_dict.items():
-            if statistic_total_time == 0:
-                time_percent = len(category_total_time_dict) / 100
-            else:
-                time_percent = round(((total_time / statistic_total_time) * 100), 2)
+        for category, time_total in category_time_total_dict.items():
+            time_percent = round(time_total / statistic_time_total * 100, 2) if statistic_time_total != 0 else 0.0
             res.category_list.append(
                 CategoryTimeStatisticDTO(
-                    category_uuid=CategoryId(category), total_time=total_time, time_percent=time_percent
+                    category_uuid=CategoryId(category), time_total=time_total, time_percent=time_percent
                 )
             )
 

@@ -12,8 +12,8 @@ from src.presentation.http.common.responses import response_404
 statistic_router = APIRouter(route_class=DishkaRoute)
 
 
-@statistic_router.get("/category/total_time", responses={**response_404})
-async def get_statistic_category_total_time(
+@statistic_router.get("/category/time_total", responses={**response_404})
+async def get_statistic_category_time_total(
     user: FromDishka[UserEntityType], uc: FromDishka[UseCaseGetCategoryStatisticType]
 ) -> ListCategoryTimeStatisticSchema:
     res = await uc.execute(user=user)

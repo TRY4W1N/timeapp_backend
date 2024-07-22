@@ -7,7 +7,7 @@ from src.domain.ctx.user.interface.types import UserId
 @dataclass
 class CategoryTimeStatisticDTO:
     category_uuid: CategoryId
-    total_time: int
+    time_total: int
     time_percent: float
 
 

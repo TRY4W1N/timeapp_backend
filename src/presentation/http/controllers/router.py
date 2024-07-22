@@ -41,4 +41,10 @@ router.include_router(
     dependencies=[*auth_dependencies],
     responses={**response_401},
 )
-router.include_router(prefix="/statistic", tags=["Statistic"], router=statistic_router, dependencies=[*auth_dependencies], responses={**response_401})
+router.include_router(
+    prefix="/statistic",
+    tags=["Statistic"],
+    router=statistic_router,
+    dependencies=[*auth_dependencies],
+    responses={**response_401},
+)
