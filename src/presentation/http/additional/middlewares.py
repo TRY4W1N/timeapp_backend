@@ -3,7 +3,7 @@ from uuid import uuid4
 
 from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette_exporter import PrometheusMiddleware
+from starlette_exporter import PrometheusMiddleware, handle_metrics
 
 from src.infrastructure.config import ConfigBase
 
@@ -30,10 +30,12 @@ async def set_request_id_middleware(
 def setup_middlewares(app: FastAPI, config: ConfigBase) -> None:
     app.add_middleware(BaseHTTPMiddleware, dispatch=set_request_id_middleware)
 
-    app.add_middleware(
-        PrometheusMiddleware,
-        app_name=config.APP_NAME,
-        labels=set_prometheus_labels(config=config),
-        prefix="starlette_exporter",
-        always_use_int_status=False,
-    )
+    if config.APP_ENV == "PROD":
+        app.router.add_route(path="/metrics", endpoint=handle_metrics)
+        app.add_middleware(
+            PrometheusMiddleware,
+            app_name=config.APP_NAME,
+            labels=set_prometheus_labels(config=config),
+            prefix="starlette_exporter",
+            always_use_int_status=False,
+        )

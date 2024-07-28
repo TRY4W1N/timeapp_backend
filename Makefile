@@ -42,10 +42,10 @@ testlocal:
 run:
 	export APP_ENV=DEV & export ENV=LOCAL & python -m src.presentation.http.app
 
-.PHONY: rundocker
-rundocker:
+.PHONY: rundockerdev
+rundockerdev:
 	docker compose -f docker-compose.dev.yaml up --build
 
-.PHONY: rundockermetrics
-rundockermetrics:
-	docker compose -f docker-compose.metrics.yaml up --build
+.PHONY: rundockerprod
+rundockerprod:
+	docker compose -f docker-compose.prod.yaml up --build
