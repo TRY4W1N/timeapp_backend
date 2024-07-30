@@ -34,9 +34,9 @@ fmt:
 pre-commit:
 	python -m pre-commit run --all-files
 
-.PHONY: testlocal
-testlocal:
-	python -m pytest src/tests -v
+.PHONY: test
+test:
+	export APP_ENV=DEV && export ENV=LOCAL && python -m pytest src/tests -v
 
 .PHONY: run
 run:
