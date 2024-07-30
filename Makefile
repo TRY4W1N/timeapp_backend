@@ -12,6 +12,7 @@ envbuild:
 	source venv/bin/activate
 	pip install --upgrade pip
 	pip install -r requirements.txt
+	pre-commit install
 
 .PHONY: envupdate
 envupdate:
@@ -34,14 +35,18 @@ fmt:
 pre-commit:
 	python -m pre-commit run --all-files
 
-.PHONY: testlocal
-testlocal:
-	python -m pytest src/tests -v
+.PHONY: test
+test:
+	export APP_ENV=DEV && export ENV=LOCAL && python -m pytest src/tests -v
 
 .PHONY: run
 run:
-	export APP_ENV=DEV & export ENV=LOCAL & python -m src.presentation.http.app
+	export APP_ENV=DEV && export ENV=LOCAL && python -m src.presentation.http.app
 
-.PHONY: rundocker
-rundocker:
-	docker compose -f docker-compose.dev.yaml up --build
+.PHONY: rundockerdev
+rundockerdev:
+	docker compose -f docker-compose.dev.yaml up --build --remove-orphans
+
+.PHONY: rundockerprod
+rundockerprod:
+	docker compose -f docker-compose.prod.yaml up --build

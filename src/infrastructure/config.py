@@ -1,8 +1,16 @@
+from enum import Enum
 import json
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+class EnvType(str, Enum):
+    LOCAL = "LOCAL"
+    DOCKER = "DOCKER"
+
+class AppEnvType(str, Enum):
+    DEV = "DEV"
+    PROD = "PROD"
 
 class ConfigBase(BaseSettings):
     ENV: str
@@ -28,11 +36,15 @@ class ConfigBase(BaseSettings):
     @field_validator("APP_ENV")
     @classmethod
     def app_env_upper(cls, v: str) -> str:
+        if v not in [e.value for e in AppEnvType]:
+            raise ValueError(f"Invalid APP_ENV value: {v}")
         return v.upper()
 
     @field_validator("ENV")
     @classmethod
     def env_upper(cls, v: str) -> str:
+        if v not in [e.value for e in EnvType]:
+            raise ValueError(f"Invalid ENV value: {v}")
         return v.upper()
 
     @property
