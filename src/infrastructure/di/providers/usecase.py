@@ -6,7 +6,6 @@ from src.domain.usecases.category.create import UsecaseCategoryCreate
 from src.domain.usecases.category.delete import UsecaseCategoryDelete
 from src.domain.usecases.category.get_list import UsecaseCategoryGetList
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
-from src.domain.usecases.interval.clear import UsecaseIntervalClear
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
 from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
@@ -49,13 +48,6 @@ class UsecaseProvider(Provider):
         gateway: GatewayCategoryType,
     ) -> AsyncIterable[UsecaseCategoryUpdate]:
         yield UsecaseCategoryUpdate(category_gateway=gateway)
-
-    @provide(scope=Scope.REQUEST)
-    async def get_interval_clear(
-        self,
-        gateway: GatewayIntervalType,
-    ) -> AsyncIterable[UsecaseIntervalClear]:
-        yield UsecaseIntervalClear(interval_gateway=gateway)
 
     @provide(scope=Scope.REQUEST)
     async def get_category_get_list(

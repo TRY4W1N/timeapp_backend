@@ -12,7 +12,6 @@ from src.domain.usecases.category.create import UsecaseCategoryCreate
 from src.domain.usecases.category.delete import UsecaseCategoryDelete
 from src.domain.usecases.category.get_list import UsecaseCategoryGetList
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
-from src.domain.usecases.interval.clear import UsecaseIntervalClear
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
 from src.domain.usecases.statistic.get_category_statistic import (
@@ -65,10 +64,6 @@ UsecaseCategoryDeleteType = Annotated[
 ]
 UsecaseCategoryGetListType = Annotated[
     UsecaseCategoryGetList,
-    FromComponent("USECASE"),
-]
-UsecaseIntervalClearType = Annotated[
-    UsecaseIntervalClear,
     FromComponent("USECASE"),
 ]
 UsecaseIntervalTrackStartType = Annotated[

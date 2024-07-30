@@ -83,6 +83,7 @@ class IntervalModel(Model):
             end_at=data["end_at"],
         )
 
+
 @dataclass
 class TimeDayModel(Model):
     uuid: str
@@ -100,6 +101,7 @@ class TimeDayModel(Model):
             time_day=data["time_day"],
             time_total=data["time_total"],
         )
+
 
 @dataclass
 class TimeAllModel(Model):

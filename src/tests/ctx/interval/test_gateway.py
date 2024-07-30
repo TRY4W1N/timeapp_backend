@@ -54,31 +54,6 @@ async def test_interval_stop_not_updated(dl: Dataloader, fx_user: UserEntity, ga
     assert f"{category.uuid}" in str(err.value)
 
 
-# pytest src/tests/ctx/interval/test_gateway.py::test_interval_clear_ok -v -s
-@pytest.mark.parametrize("arrange_interval_count", [0, 5])
-async def test_interval_clear_ok(
-    dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway, arrange_interval_count: int
-):
-    print()
-    # Arrange
-    category = await dl.category_loader.create(user_uuid=fx_user.uuid)
-    _ = [
-        await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid)
-        for _ in range(arrange_interval_count)
-    ]
-
-    mock_category = await dl.category_loader.create(user_uuid=fx_user.uuid)
-    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=CategoryId(mock_category.uuid))
-
-    # Act
-    res = await gateway_interval.clear(user=fx_user, category_uuid=CategoryId(category.uuid))
-
-    # Assert
-    assert res.category_uuid == category.uuid
-    assert res.interval_count == arrange_interval_count
-    assert res.user_uuid == fx_user.uuid
-
-
 # pytest src/tests/ctx/interval/test_gateway.py::test_interval_start_ok -v -s
 async def test_interval_start_ok(dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway):
     print()
