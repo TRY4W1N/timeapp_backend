@@ -40,11 +40,11 @@ testlocal:
 
 .PHONY: run
 run:
-	export APP_ENV=DEV & export ENV=LOCAL & python -m src.presentation.http.app
+	export APP_ENV=DEV && export ENV=LOCAL && python -m src.presentation.http.app
 
 .PHONY: rundockerdev
 rundockerdev:
-	docker compose -f docker-compose.dev.yaml up --build
+	docker compose -f docker-compose.dev.yaml up --build --remove-orphans
 
 .PHONY: rundockerprod
 rundockerprod:

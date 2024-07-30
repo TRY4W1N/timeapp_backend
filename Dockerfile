@@ -21,13 +21,3 @@ COPY --from=builder /app .
 COPY requirements.txt ./
 RUN pip install -r requirements.txt
 COPY . .
-
-
-FROM builder as app-metric
-WORKDIR /app
-COPY --from=builder /venv /venv
-COPY --from=builder /app .
-
-COPY requirements.txt ./
-RUN pip install -r requirements.txt
-COPY . .
