@@ -11,11 +11,7 @@ from src.infrastructure.database.mongodb.models import UserModel
 
 
 def build_user_entity(model: UserModel) -> UserEntity:
-    return UserEntity(
-        uuid=UserId(model.uuid),
-        email=model.email,
-        name=model.name,
-    )
+    return UserEntity(uuid=UserId(model.uuid), email=model.email, name=model.name)
 
 
 class UserGatewayMongo(GatewayMongoBase, UserGateway):
@@ -38,11 +34,7 @@ class UserGatewayMongo(GatewayMongoBase, UserGateway):
         return build_user_entity(model=model)
 
     async def create(self, user: UserCreateDTO) -> UserEntity:
-        model = UserModel(
-            uuid=user.uuid,
-            email=user.email,
-            name=user.name,
-        )
+        model = UserModel(uuid=user.uuid, email=user.email, name=user.name)
         insert_result = await self.collection.insert_one(model.to_dict())
         assert insert_result.acknowledged
         created_model = await self.collection.find_one(filter={"_id": insert_result.inserted_id})

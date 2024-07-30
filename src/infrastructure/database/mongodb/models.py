@@ -82,3 +82,37 @@ class IntervalModel(Model):
             started_at=data["started_at"],
             end_at=data["end_at"],
         )
+
+@dataclass
+class TimeDayModel(Model):
+    uuid: str
+    user_uuid: str
+    category_uuid: str
+    time_day: int
+    time_total: int
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "TimeDayModel":
+        return TimeDayModel(
+            uuid=data["uuid"],
+            user_uuid=data["user_uuid"],
+            category_uuid=data["category_uuid"],
+            time_day=data["time_day"],
+            time_total=data["time_total"],
+        )
+
+@dataclass
+class TimeAllModel(Model):
+    uuid: str
+    user_uuid: str
+    category_uuid: str
+    time_total: int
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "TimeAllModel":
+        return TimeAllModel(
+            uuid=data["uuid"],
+            user_uuid=data["user_uuid"],
+            category_uuid=data["category_uuid"],
+            time_total=data["time_total"],
+        )

@@ -15,6 +15,9 @@ from src.domain.usecases.category.update import UsecaseCategoryUpdate
 from src.domain.usecases.interval.clear import UsecaseIntervalClear
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
+from src.domain.usecases.statistic.get_category_statistic import (
+    GetCategoryStatisticUsecase,
+)
 from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
 from src.infrastructure.config import ConfigBase
 from src.infrastructure.database.mongodb.database import DatabaseMongo
@@ -76,3 +79,4 @@ UsecaseIntervalTrackStopType = Annotated[
     UsecaseIntervalTrackStop,
     FromComponent("USECASE"),
 ]
+UseCaseGetCategoryStatisticType = Annotated[GetCategoryStatisticUsecase, FromComponent("USECASE")]
