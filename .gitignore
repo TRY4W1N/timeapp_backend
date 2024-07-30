@@ -10,7 +10,3 @@ __pycache__/
 *_secret.json
 develop.json
 dev_user_list.json
-
-# Grafana
-__default__.tmpl
-grafana.db
