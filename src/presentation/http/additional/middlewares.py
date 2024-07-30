@@ -5,7 +5,7 @@ from fastapi import FastAPI, Request, Response
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette_exporter import PrometheusMiddleware, handle_metrics
 
-from src.infrastructure.config import ConfigBase, EnvType, AppEnvType
+from src.infrastructure.config import AppEnvType, ConfigBase, EnvType
 
 
 def set_prometheus_labels(config: ConfigBase) -> dict:

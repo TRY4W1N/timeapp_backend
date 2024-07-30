@@ -1,7 +1,5 @@
 [
     {
-        "uuid": "",
-        "user_uuid": "",
         "name": "Work",
         "active": true,
         "icon": "work.svg",
@@ -9,8 +7,6 @@
         "position": 1
     },
     {
-        "uuid": "",
-        "user_uuid": "",
         "name": "Reading",
         "active": true,
         "icon": "reading.svg",
@@ -18,8 +14,6 @@
         "position": 2
     },
     {
-        "uuid": "",
-        "user_uuid": "",
         "name": "Sport",
         "active": true,
         "icon": "sport.svg",
@@ -27,8 +21,6 @@
         "position": 3
     },
     {
-        "uuid": "",
-        "user_uuid": "",
         "name": "Cooking",
         "active": true,
         "icon": "cooking.svg",
@@ -36,8 +28,6 @@
         "position": 4
     },
     {
-        "uuid": "",
-        "user_uuid": "",
         "name": "Sleep",
         "active": true,
         "icon": "sleep.svg",
@@ -45,8 +35,6 @@
         "position": 5
     },
     {
-        "uuid": "",
-        "user_uuid": "",
         "name": "Rest",
         "active": true,
         "icon": "rest.svg",

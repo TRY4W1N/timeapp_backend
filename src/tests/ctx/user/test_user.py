@@ -1,7 +1,7 @@
 from src.domain.ctx.user.dto import UserCreateDTO
 from src.domain.ctx.user.interface.gateway import UserGateway
 from src.domain.ctx.user.interface.types import UserId
-from src.infrastructure.json_handler import read_default_categories_json
+from src.infrastructure.const import get_default_categories
 from src.tests.dataloader import Dataloader
 
 
@@ -20,8 +20,7 @@ async def test_user_create_ok(dl: Dataloader, gateway_user: UserGateway):
     assert res.name == user_dto.name
 
     # Assert of created default categories for user
-    default_categories = read_default_categories_json()
-    user_default_categories_query = dl.category_loader._collection.aggregate([{"$match": {"user_uuid": res.uuid}}])
-    user_default_categories_data = await user_default_categories_query.to_list(length=None)
+    default_categories = get_default_categories()
+    user_categories_list = await dl.category_loader.get_lst(fltr={"user_uuid": res.uuid})
 
-    assert len(default_categories) == len(user_default_categories_data)
+    assert len(default_categories) == len(user_categories_list)

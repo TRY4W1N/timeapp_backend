@@ -37,7 +37,7 @@ pre-commit:
 
 .PHONY: test
 test:
-	export APP_ENV=DEV && export ENV=LOCAL && python -m pytest src/tests -v
+	export APP_ENV=DEV && export ENV=LOCAL && python -m pytest src/tests -v -s
 
 .PHONY: run
 run:
