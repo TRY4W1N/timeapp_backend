@@ -4,11 +4,7 @@ from pymongo import ReturnDocument
 
 from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
-from src.domain.ctx.interval.dto import (
-    IntervalClearDTO,
-    IntervalStartDTO,
-    IntervalStopDTO,
-)
+from src.domain.ctx.interval.dto import IntervalStartDTO, IntervalStopDTO
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
 from src.domain.ctx.interval.interface.types import IntervalId
 from src.domain.ctx.user.entity import UserEntity
@@ -82,12 +78,3 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if update_one is None:
             raise EntityNotFound(msg=f"{category_uuid}")
         return IntervalStopDTO(user_uuid=user.uuid, category_uuid=category_uuid, interval_uuid=update_one["uuid"])
-
-    async def clear(self, user: UserEntity, category_uuid: CategoryId) -> IntervalClearDTO:
-        interval_filter = {"user_uuid": user.uuid, "category_uuid": category_uuid}
-        interval_delete_execution = await self.interval_collection.delete_many(filter=interval_filter)
-        assert interval_delete_execution.acknowledged
-
-        return IntervalClearDTO(
-            user_uuid=user.uuid, category_uuid=category_uuid, interval_count=interval_delete_execution.deleted_count
-        )

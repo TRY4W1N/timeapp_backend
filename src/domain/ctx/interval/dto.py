@@ -17,10 +17,3 @@ class IntervalStopDTO:
     user_uuid: UserId
     category_uuid: CategoryId
     interval_uuid: IntervalId
-
-
-@dataclass
-class IntervalClearDTO:
-    user_uuid: UserId
-    category_uuid: CategoryId
-    interval_count: int
