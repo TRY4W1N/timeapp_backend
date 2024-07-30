@@ -73,7 +73,6 @@ class UserLoader(EntityLoader[UserModel]):
         )
         assert insert_result.acknowledged
         created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
-        print(created_model)
         if created_model is None:
             raise Exception("Fail")
         data = dict(**created_model)
