@@ -2,7 +2,7 @@ import os
 
 from dishka import Provider, Scope, provide
 
-from src.infrastructure.config import EnvType, ConfigBase, ConfigDocker, ConfigLocal
+from src.infrastructure.config import ConfigBase, ConfigDocker, ConfigLocal, EnvType
 
 
 class ConfigProvider(Provider):

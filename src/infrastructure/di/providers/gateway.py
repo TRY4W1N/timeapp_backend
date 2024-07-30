@@ -44,6 +44,7 @@ class GatewayProvider(Provider):
 
     @provide(scope=Scope.REQUEST)
     async def get_user(self, database: DatabaseMongoType, config: ConfigType) -> AsyncIterable[UserGateway]:
-        collection = database.get_collection(config.MONGODB_COLLECTION_USER)
-        gateway = UserGatewayMongo(collection=collection)
+        user_collection = database.get_collection(config.MONGODB_COLLECTION_USER)
+        category_collection = database.get_collection(config.MONGODB_COLLECTION_CATEGORY)
+        gateway = UserGatewayMongo(user_collection=user_collection, category_collection=category_collection)
         yield gateway

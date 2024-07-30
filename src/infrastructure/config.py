@@ -1,16 +1,19 @@
-from enum import Enum
 import json
+from enum import Enum
 
 from pydantic import Field, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class EnvType(str, Enum):
     LOCAL = "LOCAL"
     DOCKER = "DOCKER"
 
+
 class AppEnvType(str, Enum):
     DEV = "DEV"
     PROD = "PROD"
+
 
 class ConfigBase(BaseSettings):
     ENV: str
