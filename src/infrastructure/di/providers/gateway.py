@@ -21,10 +21,12 @@ class GatewayProvider(Provider):
         category_collection = database.get_collection(config.MONGODB_COLLECTION_CATEGORY)
         interval_collection = database.get_collection(config.MONGODB_COLLECTION_INTERVAL)
         time_all_collection = database.get_collection(config.MONGODB_COLLECTION_TIMEALL)
+        time_day_collection = database.get_collection(config.MONGODB_COLLECTION_TIMEDAY)
         gateway = StatisticGatewayMongo(
             category_collection=category_collection,
             interval_collection=interval_collection,
             time_all_collection=time_all_collection,
+            time_day_collection=time_day_collection,
         )
         yield gateway
 

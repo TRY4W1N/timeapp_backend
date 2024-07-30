@@ -12,6 +12,7 @@ from src.infrastructure.database.mongodb.models import (
     CategoryModel,
     IntervalModel,
     TimeAllModel,
+    TimeDayModel,
     UserModel,
 )
 
@@ -205,11 +206,52 @@ class CategoryLoader(EntityLoader[CategoryModel]):
         return CategoryModel.from_dict(data)
 
 
+class TimeDayLoader(EntityLoader[TimeDayModel]):
+    async def create(
+        self,
+        uuid: str | None = None,
+        user_uuid: str | None = None,
+        category_uuid: str | None = None,
+        time_total: int | None = None,
+        time_day: int | None = None,
+    ) -> TimeDayModel:
+        if uuid is None:
+            uuid = uuid_gen()
+        if user_uuid is None:
+            user_uuid = user_uuid_gen()
+        if category_uuid is None:
+            category_uuid = category_uuid_gen()
+        if time_total is None:
+            time_total = 0
+        if time_day is None:
+            time_day = int(datetime.now().timestamp())
+        insert_result = await self._collection.insert_one(
+            TimeDayModel(
+                uuid=uuid, user_uuid=user_uuid, category_uuid=category_uuid, time_total=time_total, time_day=time_day
+            ).to_dict()
+        )
+        assert insert_result.acknowledged
+        created_model = await self._collection.find_one(filter={"_id": insert_result.inserted_id})
+        if created_model is None:
+            raise Exception("Fail")
+        model = TimeDayModel.from_dict(dict(**created_model))
+        return model
+
+    async def get(self, fltr: dict) -> TimeDayModel:
+        data = await self._get(fltr=fltr)
+        return TimeDayModel.from_dict(data=data)
+
+
 class Dataloader:
 
     def __init__(self, database: DatabaseMongo, config: ConfigBase) -> None:
         self._database = database
         self._config = config
+
+    @property
+    def time_day_loader(self) -> TimeDayLoader:
+        collection = self._database.get_collection(name=self._config.MONGODB_COLLECTION_TIMEDAY)
+        return TimeDayLoader(collection=collection, database=self._database, config=self._config)
 
     @property
     def time_all_loader(self) -> TimeAllLoader:
