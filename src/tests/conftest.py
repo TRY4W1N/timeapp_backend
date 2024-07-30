@@ -10,6 +10,7 @@ from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
 from src.domain.ctx.statistic.interface.gateway import StatisticGateway
 from src.domain.ctx.user.entity import UserEntity
+from src.domain.ctx.user.interface.gateway import UserGateway
 from src.domain.ctx.user.interface.types import UserId
 from src.infrastructure.config import ConfigBase
 from src.infrastructure.database.mongodb.database import DatabaseMongo
@@ -64,6 +65,11 @@ async def gateway_interval(dicon: AsyncContainer) -> AsyncGenerator[IntervalGate
 @pytest.fixture(scope="function")
 async def statistic_gateway(dicon: AsyncContainer) -> AsyncGenerator[StatisticGateway, None]:
     yield await dicon.get(StatisticGateway, component="GATEWAY")
+
+
+@pytest.fixture(scope="function")
+async def gateway_user(dicon: AsyncContainer) -> AsyncGenerator[UserGateway, None]:
+    yield await dicon.get(UserGateway, component="GATEWAY")
 
 
 @pytest.fixture(scope="function")

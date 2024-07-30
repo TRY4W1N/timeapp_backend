@@ -14,6 +14,7 @@ from src.presentation.http.controllers.user.controller import user_router
 
 router = APIRouter(route_class=DishkaRoute, responses={**response_500})
 
+
 router.include_router(
     prefix="/heal",
     tags=["Heal"],
