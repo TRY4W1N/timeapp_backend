@@ -48,7 +48,7 @@ class CategoryModel(Model):
     user_uuid: str
     name: str
     icon: str
-    icon_color: str
+    color: str
     position: int = 0
     active: bool = True
 
@@ -60,7 +60,7 @@ class CategoryModel(Model):
             name=data["name"],
             active=data["active"],
             icon=data["icon"],
-            icon_color=data["icon_color"],
+            color=data["color"],
             position=data["position"],
         )
 

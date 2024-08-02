@@ -33,7 +33,7 @@ class CategorySchema(BaseModel):
     name: str
     active: bool
     icon: str
-    icon_color: str
+    color: str
     position: int
     track_current: CategoryTrackCurrentSchema | None
 
@@ -45,7 +45,7 @@ class CategorySchema(BaseModel):
             name=obj.name,
             active=obj.active,
             icon=obj.icon,
-            icon_color=obj.icon_color,
+            color=obj.color,
             position=obj.position,
             track_current=CategoryTrackCurrentSchema.from_obj(obj=obj.track_current),
         )
@@ -71,7 +71,7 @@ class CategoryFilterSchema(BaseModel):
 class CategoryCreateSchema(BaseModel):
     name: str
     icon: str
-    icon_color: str
+    color: str
     position: int
 
     def to_obj(self) -> CategoryCreateDTO:
@@ -82,7 +82,7 @@ class CategoryUpdateSchema(BaseModel):
     name: str | None = None
     icon: str | None = None
     active: bool | None = None
-    icon_color: str | None = None
+    color: str | None = None
     position: int | None = None
 
     def to_obj(self) -> CategoryUpdateDTO:

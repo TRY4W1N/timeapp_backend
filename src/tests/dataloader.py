@@ -172,7 +172,7 @@ class CategoryLoader(EntityLoader[CategoryModel]):
         user_uuid: str | None = None,
         name: str | None = None,
         icon: str | None = None,
-        icon_color: str | None = None,
+        color: str | None = None,
         position: int = 0,
         active: bool = True,
     ) -> CategoryModel:
@@ -184,15 +184,15 @@ class CategoryLoader(EntityLoader[CategoryModel]):
             name = uuid_gen()
         if icon is None:
             icon = uuid_gen()
-        if icon_color is None:
-            icon_color = uuid_gen()
+        if color is None:
+            color = uuid_gen()
         insert_result = await self._collection.insert_one(
             CategoryModel(
                 uuid=uuid,
                 user_uuid=user_uuid,
                 name=name,
                 icon=icon,
-                icon_color=icon_color,
+                color=color,
                 position=position,
                 active=active,
             ).to_dict()
@@ -261,7 +261,7 @@ class Dataloader:
                 user_uuid=user_uuid,
                 name=uuid_gen(),
                 icon=uuid_gen(),
-                icon_color=uuid_gen(),
+                color=uuid_gen(),
             )
             category_models.append(category_model)
             end_interval_exist = False

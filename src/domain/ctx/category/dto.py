@@ -11,7 +11,7 @@ from src.domain.ctx.user.interface.types import UserId
 class CategoryCreateDTO:
     name: str
     icon: str
-    icon_color: str
+    color: str
     position: int
 
 
@@ -20,7 +20,7 @@ class CategoryUpdateDTO(UnsetDTO):
     name: str | UnsetType = UNSET
     icon: str | UnsetType = UNSET
     active: bool | UnsetType = UNSET
-    icon_color: str | UnsetType = UNSET
+    color: str | UnsetType = UNSET
     position: int | UnsetType = UNSET
 
 
