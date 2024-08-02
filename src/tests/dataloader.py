@@ -44,6 +44,11 @@ class EntityLoader(ABC, Generic[T]):
             raise Exception(f"Not found {self.__class__.__name__} with fltr={fltr}")
         return select
 
+    async def _get_lst(self, fltr: dict) -> list[dict]:
+        q = self._collection.find(fltr)
+        data = await q.to_list(length=None)
+        return data
+
 
 class UserLoader(EntityLoader[UserModel]):
 
@@ -120,9 +125,8 @@ class IntervalLoader(EntityLoader[IntervalModel]):
         return IntervalModel.from_dict(data)
 
     async def get_lst(self, fltr: dict) -> list[IntervalModel]:
-        data = self._collection.find(fltr)
-        models = await data.to_list(length=None)
-        return [IntervalModel.from_dict(dict(**model)) for model in models]
+        data = await self._get_lst(fltr=fltr)
+        return [IntervalModel.from_dict(dict(**item)) for item in data]
 
 
 class TimeAllLoader(EntityLoader[TimeAllModel]):
@@ -204,6 +208,10 @@ class CategoryLoader(EntityLoader[CategoryModel]):
     async def get(self, fltr: dict) -> CategoryModel:
         data = await self._get(fltr=fltr)
         return CategoryModel.from_dict(data)
+
+    async def get_lst(self, fltr: dict) -> list[CategoryModel]:
+        data = await self._get_lst(fltr=fltr)
+        return [CategoryModel.from_dict(dict(**item)) for item in data]
 
 
 class TimeDayLoader(EntityLoader[TimeDayModel]):
