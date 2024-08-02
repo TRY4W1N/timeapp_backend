@@ -27,7 +27,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         self.category_collection = category_collection
 
     async def start(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStartDTO:
-        started_at = int(datetime.now().timestamp())
+        started_at = self.get_timestamp()
 
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
@@ -68,7 +68,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         )
 
     async def stop(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStopDTO:
-        stopped_at = int(datetime.now().timestamp())
+        stopped_at = self.get_timestamp()
 
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
