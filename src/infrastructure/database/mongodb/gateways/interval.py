@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pymongo import ReturnDocument
 
 from src.domain.common.exception.base import EntityNotCreated, EntityNotFound

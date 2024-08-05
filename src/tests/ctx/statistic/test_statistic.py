@@ -12,7 +12,7 @@ async def _arrange_time_day_filter_time_to_unset(
 ) -> tuple[StatisticFilterTimeDayDTO, dict[str, int]]:
     fake_time = 100
     fltr = StatisticFilterTimeDayDTO(time_from=fake_time)
-    
+
     category_1 = await dl.category_loader.create(user_uuid=user.uuid)
     category_2 = await dl.category_loader.create(user_uuid=user.uuid)
 

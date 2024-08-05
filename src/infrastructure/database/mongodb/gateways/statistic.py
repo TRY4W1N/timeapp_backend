@@ -38,9 +38,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
         user_category_dict = {category["uuid"]: 0 for category in user_category_data}
 
         if len(fltr.to_dict()) != 0:
-            category_time_total_dict = await self._get_time_day_categories_time_total(
-                fltr=fltr, user=user
-            )
+            category_time_total_dict = await self._get_time_day_categories_time_total(fltr=fltr, user=user)
         else:
             category_time_total_dict = await self._get_intervals_and_time_all_categories_time_total(
                 user=user, user_category_dict=user_category_dict
@@ -155,5 +153,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
 
         category_time_total_dict: dict[str, int] = dict()
         for key in user_category_dict:
-            category_time_total_dict[key] = user_category_dict[key] + time_all_dict.get(key, 0) + interval_dict.get(key, 0)
+            category_time_total_dict[key] = (
+                user_category_dict[key] + time_all_dict.get(key, 0) + interval_dict.get(key, 0)
+            )
         return category_time_total_dict
