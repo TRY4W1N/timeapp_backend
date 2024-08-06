@@ -11,5 +11,5 @@ class GatewayMongoBase:
     def gen_uuid(self) -> str:
         return str(uuid4())
 
-    def get_timestamp(self) -> int:
+    def get_current_timestamp(self) -> int:
         return int(datetime.now().timestamp())

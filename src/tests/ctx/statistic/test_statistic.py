@@ -1,7 +1,7 @@
 import pytest
 
 from src.domain.common.exception.base import EntityNotFound
-from src.domain.ctx.statistic.dto import StatisticFilterTimeDayDTO
+from src.domain.ctx.statistic.dto import StatisticFilterDTO
 from src.domain.ctx.statistic.interface.gateway import StatisticGateway
 from src.domain.ctx.user.entity import UserEntity
 from src.tests.dataloader import Dataloader
@@ -9,10 +9,10 @@ from src.tests.dataloader import Dataloader
 
 async def _arrange_time_day_filter_time_to_unset(
     dl: Dataloader, user: UserEntity
-) -> tuple[StatisticFilterTimeDayDTO, dict[str, int]]:
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
     fake_time = 100
-    fltr = StatisticFilterTimeDayDTO(time_from=fake_time)
-    
+    fltr = StatisticFilterDTO(time_from=fake_time)
+
     category_1 = await dl.category_loader.create(user_uuid=user.uuid)
     category_2 = await dl.category_loader.create(user_uuid=user.uuid)
 
@@ -41,9 +41,9 @@ async def _arrange_time_day_filter_time_to_unset(
 
 async def _arrange_time_day_filter_time_from_unset(
     dl: Dataloader, user: UserEntity
-) -> tuple[StatisticFilterTimeDayDTO, dict[str, int]]:
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
     fake_time = 100
-    fltr = StatisticFilterTimeDayDTO(time_to=fake_time)
+    fltr = StatisticFilterDTO(time_to=fake_time)
     category_1 = await dl.category_loader.create(user_uuid=user.uuid)
     category_2 = await dl.category_loader.create(user_uuid=user.uuid)
 
@@ -74,9 +74,9 @@ async def _arrange_time_day_filter_time_from_unset(
 
 async def _arrange_time_day_filter_time_from_set_time_to_set(
     dl: Dataloader, user: UserEntity
-) -> tuple[StatisticFilterTimeDayDTO, dict[str, int]]:
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
     fake_time = 100
-    fltr = StatisticFilterTimeDayDTO(time_to=fake_time + 100, time_from=fake_time - 100)
+    fltr = StatisticFilterDTO(time_to=fake_time + 100, time_from=fake_time - 100)
 
     category_1 = await dl.category_loader.create(user_uuid=user.uuid)
     category_2 = await dl.category_loader.create(user_uuid=user.uuid)
@@ -115,8 +115,8 @@ async def _arrange_time_day_filter_time_from_set_time_to_set(
 
 async def _arrange_time_day_filter_time_from_unset_time_to_unset(
     dl: Dataloader, user: UserEntity
-) -> tuple[StatisticFilterTimeDayDTO, dict[str, int]]:
-    fltr = StatisticFilterTimeDayDTO()
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
+    fltr = StatisticFilterDTO()
     category_1 = await dl.category_loader.create(user_uuid=user.uuid)
     category_2 = await dl.category_loader.create(user_uuid=user.uuid)
     # Time days and intervals in filter range
@@ -130,10 +130,111 @@ async def _arrange_time_day_filter_time_from_unset_time_to_unset(
     return fltr, arrange_categories_time_total
 
 
+async def _arrange_filter_category_uuid_and_time_day_passed_ok(
+    dl: Dataloader, user: UserEntity
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
+    "Will get interval + time_day"
+    fake_time = 100
+    category_1 = await dl.category_loader.create(user_uuid=user.uuid)
+    category_2 = await dl.category_loader.create(user_uuid=user.uuid)
+
+    fltr = StatisticFilterDTO(
+        time_to=fake_time + 100, time_from=fake_time - 100, category_fltr=[category_1.uuid, category_2.uuid]
+    )
+
+    # Time days and intervals in filter range
+    await dl.time_day_loader.create(
+        category_uuid=category_1.uuid, user_uuid=user.uuid, time_day=fake_time, time_total=10
+    )
+    await dl.interval_loader.create(
+        user_uuid=user.uuid, category_uuid=category_2.uuid, started_at=fake_time, end_at=fake_time + 50
+    )
+
+    arrange_categories_time_total = {
+        category_1.uuid: 10,
+        category_2.uuid: 50,
+    }
+
+    # Time days and intervals out of filter range
+    category_3 = await dl.category_loader.create(user_uuid=user.uuid)
+    await dl.interval_loader.create(
+        user_uuid=user.uuid, category_uuid=category_3.uuid, started_at=fake_time - 250, end_at=fake_time
+    )
+
+    return fltr, arrange_categories_time_total
+
+
+async def _arrange_filter_category_uuid_ok(
+    dl: Dataloader, user: UserEntity
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
+    "Will get time_all + interval"
+
+    fake_time = 100
+    category_1 = await dl.category_loader.create(user_uuid=user.uuid)
+    category_2 = await dl.category_loader.create(user_uuid=user.uuid)
+
+    fltr = StatisticFilterDTO(category_fltr=[category_1.uuid, category_2.uuid])
+
+    # Time all and intervals in filter range
+    await dl.time_all_loader.create(category_uuid=category_1.uuid, user_uuid=user.uuid, time_total=10)
+    await dl.interval_loader.create(
+        user_uuid=user.uuid, category_uuid=category_2.uuid, started_at=fake_time, end_at=fake_time + 50
+    )
+
+    arrange_categories_time_total = {
+        category_1.uuid: 10,
+        category_2.uuid: 50,
+    }
+
+    # Time days and intervals out of filter range
+    category_3 = await dl.category_loader.create(user_uuid=user.uuid)
+    await dl.interval_loader.create(user_uuid=user.uuid, category_uuid=category_3.uuid, started_at=fake_time - 250)
+    await dl.time_all_loader.create(user_uuid=user.uuid, category_uuid=category_3.uuid, time_total=30)
+    return fltr, arrange_categories_time_total
+
+
+async def _arrange_filter_category_uuid_and_time_day_empty_res_category_list(
+    dl: Dataloader, user: UserEntity
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
+    "Will get interval + time_day with empty result list"
+    fake_time = 100
+
+    fltr = StatisticFilterDTO(
+        time_to=fake_time + 100, time_from=fake_time - 100, category_fltr=["not_exist_category_uuid"]
+    )
+
+    # Time days and intervals out of filter range
+    category = await dl.category_loader.create(user_uuid=user.uuid)
+    await dl.interval_loader.create(
+        user_uuid=user.uuid, category_uuid=category.uuid, started_at=fake_time - 200, end_at=fake_time + 200
+    )
+    await dl.time_day_loader.create(user_uuid=user.uuid, category_uuid=category.uuid, time_total=100)
+
+    return fltr, {}
+
+
+async def _arrange_filter_category_uuid_empty_res_category_list(
+    dl: Dataloader, user: UserEntity
+) -> tuple[StatisticFilterDTO, dict[str, int]]:
+    "Will get time_all + interval witj empty result list"
+
+    fltr = StatisticFilterDTO(category_fltr=["not_exist_category_uuid"])
+
+    # Time days and intervals out of filter range
+    category = await dl.category_loader.create(user_uuid=user.uuid)
+    await dl.interval_loader.create(user_uuid=user.uuid, category_uuid=category.uuid, started_at=200, end_at=200)
+    await dl.time_all_loader.create(user_uuid=user.uuid, category_uuid=category.uuid, time_total=100)
+    return fltr, {}
+
+
 # pytest src/tests/ctx/statistic/test_statistic.py::test_get_category_statistic_filter_time_day_passed_ok -v -s
 @pytest.mark.parametrize(
     "_arrange_fltr_data",
     [
+        _arrange_filter_category_uuid_empty_res_category_list,
+        _arrange_filter_category_uuid_and_time_day_empty_res_category_list,
+        _arrange_filter_category_uuid_ok,
+        _arrange_filter_category_uuid_and_time_day_passed_ok,
         _arrange_time_day_filter_time_from_set_time_to_set,
         _arrange_time_day_filter_time_from_unset_time_to_unset,
         _arrange_time_day_filter_time_from_unset,
@@ -154,11 +255,12 @@ async def test_get_category_statistic_filter_time_day_passed_ok(
     res_categories_total_time_dict = {category.category_uuid: category.time_total for category in res.category_list}
 
     assert res.user_uuid == fx_user.uuid
-    assert 99.99 <= sum([row.time_percent for row in res.category_list]) <= 100.1  # type: ignore
+    if len(res.category_list) != 0:
+        assert 99.99 <= sum([row.time_percent for row in res.category_list]) <= 100.1  # type: ignore
     assert res_categories_total_time_dict == arrange_categories_time_total_dict
 
 
-# pytest src/tests/ctx/statistic/test_statistic.py::test_get_category_statistic_ok -v -s
+# pytest src/tests/ctx/statistic/test_statistic.py::test_get_category_statistic_without_filter_time_day_ok -v -s
 async def test_get_category_statistic_without_filter_time_day_ok(
     dl: Dataloader, fx_user: UserEntity, statistic_gateway: StatisticGateway
 ):
@@ -189,7 +291,7 @@ async def test_get_category_statistic_without_filter_time_day_ok(
     }
 
     # Act
-    res = await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterTimeDayDTO())
+    res = await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterDTO())
 
     # Assert
     res_categories_time_dict = {category.category_uuid: category.time_total for category in res.category_list}
@@ -206,7 +308,7 @@ async def test_get_category_statistic_category_not_found(
     print()
     # Act
     with pytest.raises(EntityNotFound) as err:
-        await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterTimeDayDTO())
+        await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterDTO())
     # Assert
     assert f"{fx_user.uuid}" in str(err.value)
 
@@ -221,7 +323,7 @@ async def test_get_category_statistic_categories_time_total_0(
     _ = [await dl.category_loader.create(user_uuid=fx_user.uuid) for _ in range(category_counter)]
     # Act
 
-    res = await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterTimeDayDTO())
+    res = await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterDTO())
 
     # Assert
     assert res.user_uuid == fx_user.uuid
