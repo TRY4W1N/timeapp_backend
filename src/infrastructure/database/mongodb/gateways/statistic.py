@@ -43,7 +43,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
             )
         else:
             category_time_total_dict = await self._get_time_all_and_intervals_categories_time_total(
-                user=user, user_category_dict=user_category_dict, fltr=fltr
+                user=user, user_category_dict=user_category_dict
             )
 
         res = ListCategoryTimeStatisticDTO(user_uuid=user.uuid, category_list=[])
@@ -66,17 +66,23 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
         user_category_dict: dict[str, int],
         fltr: StatisticFilterDTO,
     ) -> dict[str, int]:
-        raw_time_day_match = {"user_uuid": user.uuid, "category_uuid": {}, "time_day": {}}
-        raw_interval_match = {"user_uuid": user.uuid, "category_uuid": {}, "started_at": {}, "end_at": {"$ne": None}}
+        raw_time_day_match = {
+            "user_uuid": user.uuid,
+            "time_day": {},
+            "category_uuid": {"$in": list(user_category_dict.keys())},
+        }
+        raw_interval_match = {
+            "user_uuid": user.uuid,
+            "started_at": {},
+            "end_at": {"$ne": None},
+            "category_uuid": {"$in": list(user_category_dict.keys())},
+        }
         if isinstance(fltr.time_from, int):
             raw_time_day_match["time_day"]["$gte"] = fltr.time_from
             raw_interval_match["started_at"]["$gte"] = fltr.time_from
         if isinstance(fltr.time_to, int):
             raw_time_day_match["time_day"]["$lte"] = fltr.time_to
             raw_interval_match["end_at"]["$lte"] = fltr.time_to
-        if isinstance(fltr.category_fltr, list):
-            raw_interval_match["category_uuid"]["$in"] = fltr.category_fltr
-            raw_time_day_match["category_uuid"]["$in"] = fltr.category_fltr
 
         interval_match = {key: value for key, value in raw_interval_match.items() if value != {}}
         time_day_match = {key: value for key, value in raw_time_day_match.items() if value != {}}
@@ -133,14 +139,13 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
         self,
         user: UserEntity,
         user_category_dict: dict[str, int],
-        fltr: StatisticFilterDTO,
     ) -> dict[str, int]:
-        raw_interval_match = {"user_uuid": user.uuid, "category_uuid": {}, "end_at": {"$ne": None}}
-        raw_time_all_match = {"user_uuid": user.uuid, "category_uuid": {}}
-        if isinstance(fltr.category_fltr, list):
-            raw_interval_match["category_uuid"]["$in"] = fltr.category_fltr
-            raw_time_all_match["category_uuid"]["$in"] = fltr.category_fltr
-            user_category_dict = {key: value for key, value in user_category_dict.items() if key in fltr.category_fltr}
+        raw_interval_match = {
+            "user_uuid": user.uuid,
+            "category_uuid": {"$in": list(user_category_dict.keys())},
+            "end_at": {"$ne": None},
+        }
+        raw_time_all_match = {"user_uuid": user.uuid, "category_uuid": {"$in": list(user_category_dict.keys())}}
 
         interval_match = {key: value for key, value in raw_interval_match.items() if value != {}}
         time_all_match = {key: value for key, value in raw_time_all_match.items() if value != {}}

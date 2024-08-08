@@ -23,4 +23,3 @@ class ListCategoryTimeStatisticDTO:
 class StatisticFilterDTO(FltrDTO):
     time_from: int | UnsetType = UNSET
     time_to: int | UnsetType = UNSET
-    category_fltr: list[str] | UnsetType = UNSET
