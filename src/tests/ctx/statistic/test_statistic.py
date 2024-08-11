@@ -155,7 +155,7 @@ async def test_get_category_statistic_filter_time_day_passed_ok(
 
     assert res.user_uuid == fx_user.uuid
     if len(res.category_list) != 0:
-        assert 99.99 <= sum([row.time_percent for row in res.category_list]) <= 100.1  # type: ignore
+        assert sum([row.time_percent for row in res.category_list]) == 100.0
     assert res_categories_total_time_dict == arrange_categories_time_total_dict
 
 
@@ -206,10 +206,11 @@ async def test_get_category_statistic_category_not_found(
 ):
     print()
     # Act
-    with pytest.raises(EntityNotFound) as err:
-        await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterDTO())
+    res = await statistic_gateway.get_categories_statistic(user=fx_user, fltr=StatisticFilterDTO())
+    assert res.user_uuid == fx_user.uuid
     # Assert
-    assert f"{fx_user.uuid}" in str(err.value)
+    assert isinstance(res.category_list, list)
+    assert len(res.category_list) == 0
 
 
 # pytest src/tests/ctx/statistic/test_statistic.py::test_get_category_statistic_categories_time_total_0 -v -s

@@ -1,4 +1,3 @@
-from src.domain.common.exception.base import EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
 from src.domain.ctx.statistic.dto import (
     CategoryTimeStatisticDTO,
@@ -29,12 +28,13 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
     async def get_categories_statistic(
         self, user: UserEntity, fltr: StatisticFilterDTO
     ) -> ListCategoryTimeStatisticDTO:
+        result = ListCategoryTimeStatisticDTO(user_uuid=user.uuid, category_list=[])
         user_category_query = self.category_collection.aggregate(
             [{"$match": {"user_uuid": user.uuid}}, {"$project": {"uuid": 1, "_id": 0}}]
         )
         user_category_data = await user_category_query.to_list(length=None)
         if len(user_category_data) == 0:
-            raise EntityNotFound(msg=f"Not found category for {user.uuid=}")
+            return result
         user_category_dict = {category["uuid"]: 0 for category in user_category_data}
 
         if isinstance(fltr.time_from, int) or (isinstance(fltr.time_to, int)):
@@ -46,19 +46,18 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
                 user=user, user_category_dict=user_category_dict
             )
 
-        res = ListCategoryTimeStatisticDTO(user_uuid=user.uuid, category_list=[])
         if len(category_time_total_dict) == 0:
-            return res
+            return result
 
         statistic_time_total = sum(value for value in category_time_total_dict.values())
         for category, time_total in category_time_total_dict.items():
             time_percent = round(time_total / statistic_time_total * 100, 2) if statistic_time_total != 0 else 0.0
-            res.category_list.append(
+            result.category_list.append(
                 CategoryTimeStatisticDTO(
                     category_uuid=CategoryId(category), time_total=time_total, time_percent=time_percent
                 )
             )
-        return res
+        return result
 
     async def _get_time_day_and_interval_categories_time_total(
         self,
