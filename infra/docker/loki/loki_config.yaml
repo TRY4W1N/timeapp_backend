@@ -1,0 +1,33 @@
+auth_enabled: false
+
+server:
+  http_listen_port: 3100
+  grpc_listen_port: 9096
+
+ingester:
+  wal:
+      dir: "/tmp/wal"
+  lifecycler:
+    address: loki
+    ring: 
+      replication_factor: 1
+      kvstore:
+        store: inmemory
+  chunk_idle_period: 35m
+  chunk_retain_period: 30m
+
+storage_config:
+  boltdb:
+    directory: /tmp/loki/index
+  filesystem:
+    directory: /tmp/loki/chunks
+
+schema_config:
+  configs:
+    - from: 2020-01-01
+      store: boltdb
+      object_store: filesystem
+      schema: v11
+      index:
+        prefix: index_
+        period: 168h

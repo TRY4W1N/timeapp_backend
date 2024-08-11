@@ -1,0 +1,44 @@
+[
+    {
+        "name": "Work",
+        "active": true,
+        "icon": "work.svg",
+        "color": "0.0.255.1",
+        "position": 1
+    },
+    {
+        "name": "Reading",
+        "active": true,
+        "icon": "reading.svg",
+        "color": "0.255.0.1",
+        "position": 2
+    },
+    {
+        "name": "Sport",
+        "active": true,
+        "icon": "sport.svg",
+        "color": "255.0.0.1",
+        "position": 3
+    },
+    {
+        "name": "Cooking",
+        "active": true,
+        "icon": "cooking.svg",
+        "color": "255.105.180.1",
+        "position": 4
+    },
+    {
+        "name": "Sleep",
+        "active": true,
+        "icon": "sleep.svg",
+        "color": "128.0.128.1",
+        "position": 5
+    },
+    {
+        "name": "Rest",
+        "active": true,
+        "icon": "rest.svg",
+        "color": "204.255.204.1",
+        "position": 6
+    }
+]

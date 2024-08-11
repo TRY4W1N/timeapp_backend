@@ -1,0 +1,26 @@
+sources:
+  docker:
+    type: docker_logs
+    docker_host: "/var/run/docker.sock"
+    include_containers: 
+      - app
+
+sinks:
+  console:
+    type: console
+    inputs:
+      - docker
+    encoding:
+      codec: "json"
+
+  my_sink_id:
+    type: loki
+    inputs:
+      - docker
+    encoding:
+      codec: "json"
+    labels:
+      event: "log"
+      container_name: "{{container_name}}"
+    endpoint: http://loki:3100
+    healthcheck: true
