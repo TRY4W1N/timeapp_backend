@@ -63,7 +63,7 @@ async def gateway_interval(dicon: AsyncContainer) -> AsyncGenerator[IntervalGate
 
 
 @pytest.fixture(scope="function")
-async def gateway_time_all(dicon: AsyncContainer) -> AsyncGenerator[StatisticGateway, None]:
+async def statistic_gateway(dicon: AsyncContainer) -> AsyncGenerator[StatisticGateway, None]:
     yield await dicon.get(StatisticGateway, component="GATEWAY")
 
 

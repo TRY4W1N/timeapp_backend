@@ -1,5 +1,3 @@
-from datetime import datetime
-
 from pymongo import ReturnDocument
 
 from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
@@ -23,7 +21,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         self.category_collection = category_collection
 
     async def start(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStartDTO:
-        started_at = int(datetime.now().timestamp())
+        started_at = self.get_current_timestamp()
 
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
@@ -64,7 +62,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         )
 
     async def stop(self, user: UserEntity, category_uuid: CategoryId) -> IntervalStopDTO:
-        stopped_at = int(datetime.now().timestamp())
+        stopped_at = self.get_current_timestamp()
 
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
