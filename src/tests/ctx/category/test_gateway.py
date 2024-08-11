@@ -20,12 +20,12 @@ async def test_create(dl: Dataloader, gateway_category: CategoryGateway):
     user_uuid = UserId(user_uuid_gen())
     name = "test_category"
     icon = "boba"
-    icon_color = "rnd_color"
+    color = "rnd_color"
     postion = 1337
 
     # Act
     entity = await gateway_category.create(
-        user_uuid=user_uuid, obj=CategoryCreateDTO(name=name, icon=icon, icon_color=icon_color, position=postion)
+        user_uuid=user_uuid, obj=CategoryCreateDTO(name=name, icon=icon, color=color, position=postion)
     )
 
     # Assert
@@ -33,7 +33,7 @@ async def test_create(dl: Dataloader, gateway_category: CategoryGateway):
     assert entity.user_uuid == user_uuid
     assert entity.name == name
     assert entity.icon == icon
-    assert entity.icon_color == icon_color
+    assert entity.color == color
     assert entity.position == postion
 
 
@@ -96,7 +96,7 @@ async def test_update(dl: Dataloader, gateway_category: CategoryGateway):
     assert updated_entity.name == upd_name
     assert updated_entity.active == upd_active
     assert updated_entity.icon == category_model.icon
-    assert updated_entity.icon_color == category_model.icon_color
+    assert updated_entity.color == category_model.color
     assert updated_entity.position == category_model.position
     assert updated_entity.track_current is not None
     assert updated_entity.track_current.category_uuid == category_uuid
