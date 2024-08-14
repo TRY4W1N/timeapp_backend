@@ -32,49 +32,10 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if category is None:
             raise EntityNotFound(msg=f"{category_uuid=}")
 
-        interval_filter = {
-            "category_uuid": category_uuid,
-            "user_uuid": user.uuid,
-            "end_at": {"$eq": None},
-        }
-        interval_data_query = self.interval_collection.aggregate(
-            pipeline=[
-                {"$match": interval_filter},
-                {
-                    "$sort": {
-                        "started_at": pymongo.ASCENDING,
-                    },
-                },
-            ],
-            allowDiskUse=True,
-        )
-        interval_data_list = await interval_data_query.to_list(length=None)
+        interval_data_list = await self._get_closed_interval_list(user_uuid=user.uuid, category_uuid=category_uuid)
 
         if len(interval_data_list) != 0:
-            data_list = balancing_interval_list(interval_data_list, started_at)
-            data_list = extend_interval_list_per_day(data_list)
-            interval_delete_uuid_list = list(
-                {item["uuid"] for item in interval_data_list} - {item["uuid"] for item in data_list}
-            )
-            bulk_operation_list = []
-            for item in data_list:
-                model = IntervalModel.from_dict(item)
-                if model.uuid is None:
-                    model.uuid = self.gen_uuid()
-                bulk_operation_list.append(
-                    UpdateOne(
-                        {"uuid": item["uuid"]},
-                        {"$set": model.to_dict()},
-                        upsert=True,
-                    )
-                )
-            if len(interval_delete_uuid_list) > 0:
-                bulk_operation_list.append(
-                    DeleteMany(
-                        {"uuid": {"$in": interval_delete_uuid_list}},
-                    ),
-                )
-            await self.interval_collection.bulk_write(bulk_operation_list)
+            await self._correct_opened_interval_list(interval_data_list, started_at)
 
         model = IntervalModel(
             uuid=self.gen_uuid(),
@@ -102,9 +63,23 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if category is None:
             raise EntityNotFound(msg=f"Category not found for user_uuid={user.uuid} with uuid={category_uuid}")
 
+        interval_data_list = await self._get_closed_interval_list(user_uuid=user.uuid, category_uuid=category_uuid)
+        if len(interval_data_list) == 0:
+            raise EntityNotFound(msg=f"Open intervals not found for user_uuid={user.uuid} with uuid={category_uuid}")
+
+        correct_data = await self._correct_opened_interval_list(interval_data_list, stopped_at)
+
+        last_closed_interval = correct_data[-1]
+        return IntervalStopDTO(
+            user_uuid=last_closed_interval["user_uuid"],
+            category_uuid=last_closed_interval["category_uuid"],
+            interval_uuid=last_closed_interval["uuid"],
+        )
+
+    async def _get_closed_interval_list(self, user_uuid: UserId, category_uuid: CategoryId) -> list[dict]:
         interval_filter = {
             "category_uuid": category_uuid,
-            "user_uuid": user.uuid,
+            "user_uuid": user_uuid,
             "end_at": {"$eq": None},
         }
         interval_data_query = self.interval_collection.aggregate(
@@ -119,9 +94,10 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
             allowDiskUse=True,
         )
         interval_data_list = await interval_data_query.to_list(length=None)
-        if len(interval_data_list) == 0:
-            raise EntityNotFound(msg=f"Open intervals not found for user_uuid={user.uuid} with uuid={category_uuid}")
-        data_list = balancing_interval_list(interval_data_list, stopped_at)
+        return interval_data_list
+
+    async def _correct_opened_interval_list(self, interval_data_list: list[dict], end_time: int) -> list[dict]:
+        data_list = balancing_interval_list(interval_data_list, end_time)
         data_list = extend_interval_list_per_day(data_list)
         interval_delete_uuid_list = list(
             {item["uuid"] for item in interval_data_list} - {item["uuid"] for item in data_list}
@@ -136,7 +112,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
                     {"uuid": item["uuid"]},
                     {"$set": model.to_dict()},
                     upsert=True,
-                ),
+                )
             )
         if len(interval_delete_uuid_list) > 0:
             bulk_operation_list.append(
@@ -145,13 +121,7 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
                 ),
             )
         await self.interval_collection.bulk_write(bulk_operation_list)
-
-        last_closed_interval = data_list[-1]
-        return IntervalStopDTO(
-            user_uuid=last_closed_interval["user_uuid"],
-            category_uuid=last_closed_interval["category_uuid"],
-            interval_uuid=last_closed_interval["uuid"],
-        )
+        return data_list
 
 
 def get_date_range(start_in: datetime, end_in: datetime) -> Generator[date, None, None]:
