@@ -1,4 +1,8 @@
-from pymongo import ReturnDocument
+from collections.abc import Generator
+from datetime import date, datetime, timedelta
+
+import pymongo
+from pymongo import ReturnDocument, UpdateOne
 
 from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
@@ -34,14 +38,34 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
             "end_at": {"$eq": None},
         }
         interval_data_query = self.interval_collection.aggregate(
-            pipeline=[{"$match": interval_filter}], allowDiskUse=True
+            pipeline=[
+                {"$match": interval_filter},
+                {
+                    "$sort": {
+                        "started_at": pymongo.ASCENDING,
+                    },
+                },
+            ],
+            allowDiskUse=True,
         )
         interval_data_list = await interval_data_query.to_list(length=None)
+
         if len(interval_data_list) != 0:
-            query_filter = [interval["uuid"] for interval in interval_data_list]
-            await self.interval_collection.update_many(
-                filter={"uuid": {"$in": query_filter}}, update={"$set": {"end_at": started_at}}
-            )
+            data_list = balancing_interval_list(interval_data_list, started_at)
+            data_list = extend_interval_list_per_day(data_list)
+            bulk_operation_list = []
+            for item in data_list:
+                model = IntervalModel.from_dict(item)
+                if model.uuid is None:
+                    model.uuid = self.gen_uuid()
+                bulk_operation_list.append(
+                    UpdateOne(
+                        {"uuid": item["uuid"]},
+                        {"$set": model.to_dict()},
+                        upsert=True,
+                    )
+                )
+            await self.interval_collection.bulk_write(bulk_operation_list)
 
         model = IntervalModel(
             uuid=self.gen_uuid(),
@@ -76,3 +100,61 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if update_one is None:
             raise EntityNotFound(msg=f"{category_uuid}")
         return IntervalStopDTO(user_uuid=user.uuid, category_uuid=category_uuid, interval_uuid=update_one["uuid"])
+
+
+def get_date_range(start_in: datetime, end_in: datetime) -> Generator[date, None, None]:
+    start = start_in.date() + timedelta(1)
+    end = end_in.date()
+    while start <= end:
+        yield start
+        start += timedelta(1)
+
+
+def balancing_interval_list(interval_list: list, interval_last_end_at: int) -> list:
+    # One element
+    if len(interval_list) - 1 == 0:
+        interval_list[0]["end_at"] = interval_last_end_at
+        return interval_list
+
+    # Remove duplicates by started_at
+    interval_list = list({i["started_at"]: i for i in interval_list}.values())
+
+    # Balancing
+    for i in range(len(interval_list) - 1):
+        current_item = interval_list[i]
+        next_item = interval_list[i + 1]
+        current_item["end_at"] = next_item["started_at"]
+        if i + 1 == len(interval_list) - 1:
+            next_item["end_at"] = interval_last_end_at
+    return interval_list
+
+
+def split_interval_per_day(start_ts: int, end_ts: int) -> list:
+    start = datetime.fromtimestamp(start_ts)
+    end = datetime.fromtimestamp(end_ts)
+    dates = [datetime.strptime(str(date_iter), "%Y-%m-%d") for date_iter in get_date_range(start, end)] + [start, end]
+    dates = sorted(dates)
+
+    diapason = []
+    for i in range(len(dates) - 1):
+        diapason.append((dates[i], dates[i + 1]))
+    return diapason
+
+
+def extend_interval_list_per_day(interval_list: list) -> list:
+    interval_list_new = []
+    for interval in interval_list:
+        nested_date_intervals = split_interval_per_day(interval["started_at"], interval["end_at"])
+        for idx, date_interval in enumerate(nested_date_intervals):
+            st, en = date_interval
+            interval_list_new.append(
+                {
+                    "uuid": interval["uuid"] if idx == 0 else None,
+                    "user_uuid": interval["user_uuid"],
+                    "category_uuid": interval["category_uuid"],
+                    "started_at": int(st.timestamp()),
+                    "end_at": int(en.timestamp()),
+                }
+            )
+
+    return interval_list_new
