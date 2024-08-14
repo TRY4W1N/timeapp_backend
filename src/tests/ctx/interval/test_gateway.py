@@ -16,13 +16,47 @@ async def test_interval_stop_ok(dl: Dataloader, fx_user: UserEntity, gateway_int
     # Arrange
 
     category = await dl.category_loader.create(user_uuid=fx_user.uuid)
+    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid)  # duplicate of target
     target_interval = await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid)
-    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category.uuid)
 
     # Act
     res = await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid))
 
     # Assert
+    assert res.user_uuid == fx_user.uuid
+    assert res.category_uuid == category.uuid
+    assert res.interval_uuid == target_interval.uuid
+
+
+# pytest src/tests/ctx/interval/test_gateway.py::test_interval_stop_with_many_opened -v -s
+async def test_interval_stop_with_many_opened(dl: Dataloader, fx_user: UserEntity, gateway_interval: IntervalGateway):
+    print()
+    # Arrange
+
+    category = await dl.category_loader.create(user_uuid=fx_user.uuid)
+    started_at = datetime.now() - timedelta(hours=1, minutes=2)
+    started_at_day2ago = started_at - timedelta(days=2) - timedelta(hours=1, minutes=2)
+    started_at_day5ago = started_at - timedelta(days=5) - timedelta(hours=2, minutes=15)
+
+    await dl.interval_loader.create(
+        user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=int(started_at_day5ago.timestamp())
+    )
+    await dl.interval_loader.create(
+        user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=int(started_at_day2ago.timestamp())
+    )
+    await dl.interval_loader.create(
+        user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=int(started_at.timestamp())
+    )  # duplicate of target
+    target_interval = await dl.interval_loader.create(
+        user_uuid=fx_user.uuid, category_uuid=category.uuid, started_at=int(started_at.timestamp())
+    )
+
+    # Act
+    res = await gateway_interval.stop(user=fx_user, category_uuid=CategoryId(category.uuid))
+    # Assert
+    fltr = {"category_uuid": category.uuid, "user_uuid": fx_user.uuid}
+    all_interval_list = await dl.interval_loader.get_lst(fltr=fltr)
+    assert len(all_interval_list) == 8
     assert res.user_uuid == fx_user.uuid
     assert res.category_uuid == category.uuid
     assert res.interval_uuid == target_interval.uuid

@@ -2,7 +2,7 @@ from collections.abc import Generator
 from datetime import date, datetime, timedelta
 
 import pymongo
-from pymongo import ReturnDocument, UpdateOne
+from pymongo import DeleteMany, UpdateOne
 
 from src.domain.common.exception.base import EntityNotCreated, EntityNotFound
 from src.domain.ctx.category.interface.types import CategoryId
@@ -53,6 +53,9 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         if len(interval_data_list) != 0:
             data_list = balancing_interval_list(interval_data_list, started_at)
             data_list = extend_interval_list_per_day(data_list)
+            interval_delete_uuid_list = list(
+                {item["uuid"] for item in interval_data_list} - {item["uuid"] for item in data_list}
+            )
             bulk_operation_list = []
             for item in data_list:
                 model = IntervalModel.from_dict(item)
@@ -64,6 +67,12 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
                         {"$set": model.to_dict()},
                         upsert=True,
                     )
+                )
+            if len(interval_delete_uuid_list) > 0:
+                bulk_operation_list.append(
+                    DeleteMany(
+                        {"uuid": {"$in": interval_delete_uuid_list}},
+                    ),
                 )
             await self.interval_collection.bulk_write(bulk_operation_list)
 
@@ -91,15 +100,58 @@ class IntervalGatewayMongo(GatewayMongoBase, IntervalGateway):
         category_filter = {"uuid": category_uuid, "user_uuid": user.uuid}
         category = await self.category_collection.find_one(filter=category_filter)
         if category is None:
-            raise EntityNotFound(msg=f"{category_uuid=}")
+            raise EntityNotFound(msg=f"Category not found for user_uuid={user.uuid} with uuid={category_uuid}")
 
-        fltr = {"category_uuid": category_uuid, "user_uuid": user.uuid}
-        update_one = await self.interval_collection.find_one_and_update(
-            filter=fltr, update={"$set": {"end_at": stopped_at}}, return_document=ReturnDocument.AFTER
+        interval_filter = {
+            "category_uuid": category_uuid,
+            "user_uuid": user.uuid,
+            "end_at": {"$eq": None},
+        }
+        interval_data_query = self.interval_collection.aggregate(
+            pipeline=[
+                {"$match": interval_filter},
+                {
+                    "$sort": {
+                        "started_at": pymongo.ASCENDING,
+                    },
+                },
+            ],
+            allowDiskUse=True,
         )
-        if update_one is None:
-            raise EntityNotFound(msg=f"{category_uuid}")
-        return IntervalStopDTO(user_uuid=user.uuid, category_uuid=category_uuid, interval_uuid=update_one["uuid"])
+        interval_data_list = await interval_data_query.to_list(length=None)
+        if len(interval_data_list) == 0:
+            raise EntityNotFound(msg=f"Open intervals not found for user_uuid={user.uuid} with uuid={category_uuid}")
+        data_list = balancing_interval_list(interval_data_list, stopped_at)
+        data_list = extend_interval_list_per_day(data_list)
+        interval_delete_uuid_list = list(
+            {item["uuid"] for item in interval_data_list} - {item["uuid"] for item in data_list}
+        )
+        bulk_operation_list = []
+        for item in data_list:
+            model = IntervalModel.from_dict(item)
+            if model.uuid is None:
+                model.uuid = self.gen_uuid()
+            bulk_operation_list.append(
+                UpdateOne(
+                    {"uuid": item["uuid"]},
+                    {"$set": model.to_dict()},
+                    upsert=True,
+                ),
+            )
+        if len(interval_delete_uuid_list) > 0:
+            bulk_operation_list.append(
+                DeleteMany(
+                    {"uuid": {"$in": interval_delete_uuid_list}},
+                ),
+            )
+        await self.interval_collection.bulk_write(bulk_operation_list)
+
+        last_closed_interval = data_list[-1]
+        return IntervalStopDTO(
+            user_uuid=last_closed_interval["user_uuid"],
+            category_uuid=last_closed_interval["category_uuid"],
+            interval_uuid=last_closed_interval["uuid"],
+        )
 
 
 def get_date_range(start_in: datetime, end_in: datetime) -> Generator[date, None, None]:
@@ -111,13 +163,13 @@ def get_date_range(start_in: datetime, end_in: datetime) -> Generator[date, None
 
 
 def balancing_interval_list(interval_list: list, interval_last_end_at: int) -> list:
-    # One element
-    if len(interval_list) - 1 == 0:
-        interval_list[0]["end_at"] = interval_last_end_at
-        return interval_list
-
     # Remove duplicates by started_at
     interval_list = list({i["started_at"]: i for i in interval_list}.values())
+
+    # One element
+    if len(interval_list) == 1:
+        interval_list[0]["end_at"] = interval_last_end_at
+        return interval_list
 
     # Balancing
     for i in range(len(interval_list) - 1):
