@@ -8,10 +8,14 @@ from src.domain.usecases.category.get_list import UsecaseCategoryGetList
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
+from src.domain.usecases.statistic.get_category_statistic import (
+    GetCategoryStatisticUsecase,
+)
 from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
 from src.infrastructure.di.alias import (
     GatewayCategoryType,
     GatewayIntervalType,
+    GatewayStatisticType,
     GatewayUserType,
     ServiceAuthType,
 )
@@ -69,3 +73,7 @@ class UsecaseProvider(Provider):
         gateway: GatewayIntervalType,
     ) -> AsyncIterable[UsecaseIntervalTrackStop]:
         yield UsecaseIntervalTrackStop(interval_gateway=gateway)
+
+    @provide(scope=Scope.REQUEST)
+    async def get_category_statistic(self, gateway: GatewayStatisticType) -> AsyncIterable[GetCategoryStatisticUsecase]:
+        yield GetCategoryStatisticUsecase(statistic_gateway=gateway)

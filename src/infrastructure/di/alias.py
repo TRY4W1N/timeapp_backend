@@ -6,6 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from src.domain.ctx.auth.interface.service import AuthService
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
+from src.domain.ctx.statistic.interface.gateway import StatisticGateway
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.gateway import UserGateway
 from src.domain.usecases.category.create import UsecaseCategoryCreate
@@ -44,6 +45,7 @@ ServiceAuthType = Annotated[
 GatewayUserType = Annotated[UserGateway, FromComponent("GATEWAY")]
 GatewayCategoryType = Annotated[CategoryGateway, FromComponent("GATEWAY")]
 GatewayIntervalType = Annotated[IntervalGateway, FromComponent("GATEWAY")]
+GatewayStatisticType = Annotated[StatisticGateway, FromComponent("GATEWAY")]
 
 # Usecases
 UsecaseUserGetByTokenType = Annotated[
