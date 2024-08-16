@@ -1,6 +1,6 @@
 from dishka import FromDishka
 from dishka.integrations.fastapi import DishkaRoute
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
 from src.infrastructure.di.alias import UseCaseGetCategoryStatisticType, UserEntityType
 from src.presentation.http.controllers.statistic.schemas import (
@@ -13,7 +13,9 @@ statistic_router = APIRouter(route_class=DishkaRoute)
 
 @statistic_router.get("/category/time_total")
 async def get_statistic_category_time_total(
-    user: FromDishka[UserEntityType], uc: FromDishka[UseCaseGetCategoryStatisticType], fltr: StatisticFilterSchema
+    user: FromDishka[UserEntityType],
+    uc: FromDishka[UseCaseGetCategoryStatisticType],
+    fltr: StatisticFilterSchema = Depends(),
 ) -> ListCategoryTimeStatisticSchema:
     fltr_obj = fltr.to_obj()
     res = await uc.execute(user=user, fltr=fltr_obj)
