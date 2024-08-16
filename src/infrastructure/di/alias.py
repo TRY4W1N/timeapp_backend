@@ -15,8 +15,8 @@ from src.domain.usecases.category.get_list import UsecaseCategoryGetList
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
-from src.domain.usecases.statistic.get_category_statistic import (
-    GetCategoryStatisticUsecase,
+from src.domain.usecases.statistic.category_sum_list import (
+    UsecaseCategoryStatisticSumList,
 )
 from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
 from src.infrastructure.config import ConfigBase
@@ -76,4 +76,4 @@ UsecaseIntervalTrackStopType = Annotated[
     UsecaseIntervalTrackStop,
     FromComponent("USECASE"),
 ]
-UseCaseGetCategoryStatisticType = Annotated[GetCategoryStatisticUsecase, FromComponent("USECASE")]
+UseCaseGetCategoryStatisticType = Annotated[UsecaseCategoryStatisticSumList, FromComponent("USECASE")]

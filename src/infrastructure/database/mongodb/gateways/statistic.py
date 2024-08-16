@@ -30,7 +30,10 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
     ) -> ListCategoryTimeStatisticDTO:
         result = ListCategoryTimeStatisticDTO(user_uuid=user.uuid, category_list=[])
         user_category_query = self.category_collection.aggregate(
-            [{"$match": {"user_uuid": user.uuid}}, {"$project": {"uuid": 1, "_id": 0}}]
+            [
+                {"$match": {"user_uuid": user.uuid, "active": True}},
+                {"$project": {"uuid": 1, "_id": 0}},
+            ]
         )
         user_category_data = await user_category_query.to_list(length=None)
         if len(user_category_data) == 0:
@@ -57,6 +60,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
                     category_uuid=CategoryId(category), time_total=time_total, time_percent=time_percent
                 )
             )
+        result.category_list.sort(key=lambda x: x.time_total, reverse=True)
         return result
 
     async def _get_time_day_and_interval_categories_time_total(
@@ -124,7 +128,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
         time_day_data = await time_day_data_query.to_list(length=None)
 
         if len(time_day_data) == 0 and len(interval_data) == 0:
-            return {}
+            return user_category_dict
         interval_dict = {interval["category_uuid"]: interval["time_total"] for interval in interval_data}
         time_day_dict = {time_day["category_uuid"]: time_day["time_total"] for time_day in time_day_data}
         categories_uuid_set = set(interval_dict.keys()) | set(time_day_dict.keys())
@@ -178,7 +182,7 @@ class StatisticGatewayMongo(GatewayMongoBase, StatisticGateway):
         )
         time_all_res = await time_all_query.to_list(length=None)
         if len(time_all_res) == 0 and len(interval_res) == 0:
-            return {}
+            return user_category_dict
 
         interval_dict = {item["category_uuid"]: item["time_total"] for item in interval_res}
         time_all_dict = {item["category_uuid"]: item["time_total"] for item in time_all_res}

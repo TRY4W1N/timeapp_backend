@@ -1,6 +1,7 @@
 from typing import Union
 
 from pydantic import BaseModel
+from pydantic.json_schema import SkipJsonSchema
 
 from src.domain.ctx.category.dto import (
     CategoryCreateDTO,
@@ -61,8 +62,8 @@ class CategoryListSchema(BaseModel):
 
 
 class CategoryFilterSchema(BaseModel):
-    name__like: str | None = None
-    active__eq: bool | None = None
+    name__like: str | SkipJsonSchema[None] = None
+    active__eq: bool | SkipJsonSchema[None] = None
 
     def to_obj(self) -> CategoryFilterDTO:
         return CategoryFilterDTO(**self.model_dump(exclude_unset=True))
