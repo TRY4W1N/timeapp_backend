@@ -15,7 +15,7 @@ async def test_stop_interval_ok(
     category_model = await dl.category_loader.create(user_uuid=fx_user.uuid)
     interval_model = await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
 
-    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid)
+    await dl.interval_loader.create(user_uuid=fx_user.uuid, category_uuid=category_model.uuid, end_at=200)
 
     # Act
     res = await uc.execute(user=fx_user, category_uuid=CategoryId(category_model.uuid))
