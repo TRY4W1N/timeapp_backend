@@ -19,6 +19,6 @@ class CategoryEntity:
     name: str
     active: bool
     icon: str
-    icon_color: str
+    color: str
     position: int
     track_current: CategoryTrackCurrent | None

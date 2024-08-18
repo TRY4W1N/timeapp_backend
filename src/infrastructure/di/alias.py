@@ -6,6 +6,7 @@ from motor.motor_asyncio import AsyncIOMotorClient
 from src.domain.ctx.auth.interface.service import AuthService
 from src.domain.ctx.category.interface.gateway import CategoryGateway
 from src.domain.ctx.interval.interface.gateway import IntervalGateway
+from src.domain.ctx.statistic.interface.gateway import StatisticGateway
 from src.domain.ctx.user.entity import UserEntity
 from src.domain.ctx.user.interface.gateway import UserGateway
 from src.domain.usecases.category.create import UsecaseCategoryCreate
@@ -14,8 +15,8 @@ from src.domain.usecases.category.get_list import UsecaseCategoryGetList
 from src.domain.usecases.category.update import UsecaseCategoryUpdate
 from src.domain.usecases.interval.track_start import UsecaseIntervalTrackStart
 from src.domain.usecases.interval.track_stop import UsecaseIntervalTrackStop
-from src.domain.usecases.statistic.get_category_statistic import (
-    GetCategoryStatisticUsecase,
+from src.domain.usecases.statistic.category_sum_list import (
+    UsecaseCategoryStatisticSumList,
 )
 from src.domain.usecases.user.user_get_by_token import UsecaseUserGetByToken
 from src.infrastructure.config import ConfigBase
@@ -44,6 +45,7 @@ ServiceAuthType = Annotated[
 GatewayUserType = Annotated[UserGateway, FromComponent("GATEWAY")]
 GatewayCategoryType = Annotated[CategoryGateway, FromComponent("GATEWAY")]
 GatewayIntervalType = Annotated[IntervalGateway, FromComponent("GATEWAY")]
+GatewayStatisticType = Annotated[StatisticGateway, FromComponent("GATEWAY")]
 
 # Usecases
 UsecaseUserGetByTokenType = Annotated[
@@ -74,4 +76,4 @@ UsecaseIntervalTrackStopType = Annotated[
     UsecaseIntervalTrackStop,
     FromComponent("USECASE"),
 ]
-UseCaseGetCategoryStatisticType = Annotated[GetCategoryStatisticUsecase, FromComponent("USECASE")]
+UseCaseGetCategoryStatisticType = Annotated[UsecaseCategoryStatisticSumList, FromComponent("USECASE")]

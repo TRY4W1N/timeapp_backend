@@ -24,7 +24,7 @@ clean:
 
 .PHONY: lint
 lint:
-	python -m ruff check .
+	ruff check src/**
 
 .PHONY: fmt
 fmt:

@@ -45,7 +45,7 @@ async def test_ok(dl: Dataloader, fx_user: UserEntity, usecase_category_update: 
     assert updated_entity.name == upd_name
     assert updated_entity.active == upd_active
     assert updated_entity.icon == category_model.icon
-    assert updated_entity.icon_color == category_model.icon_color
+    assert updated_entity.color == category_model.color
     assert updated_entity.position == category_model.position
     assert updated_entity.track_current is not None
     assert updated_entity.track_current.category_uuid == category_uuid

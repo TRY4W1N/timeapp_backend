@@ -36,7 +36,7 @@ def build_category_entity(model: CategoryModel, track_current: CategoryTrackCurr
         name=model.name,
         active=model.active,
         icon=model.icon,
-        icon_color=model.icon_color,
+        color=model.color,
         position=model.position,
         track_current=track_current_dto,
     )
@@ -58,7 +58,7 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
             user_uuid=user_uuid,
             name=obj.name,
             icon=obj.icon,
-            icon_color=obj.icon_color,
+            color=obj.color,
             position=obj.position,
         )
         insert_result = await self.category_collection.insert_one(model.to_dict())

@@ -18,6 +18,9 @@ extend-immutable-calls = ["fastapi.Depends", "fastapi.Query", "fastapi.Body", "f
 [tool.ruff.mccabe]
 max-complexity = 10
 
+[tool.ruff.lint]
+exclude=["*tests*"]
+
 [tool.black]
 line-length = 120
 target-version = ['py311']

@@ -1,6 +1,10 @@
 from pydantic import BaseModel
+from pydantic.json_schema import SkipJsonSchema
 
-from src.domain.ctx.statistic.dto import ListCategoryTimeStatisticDTO
+from src.domain.ctx.statistic.dto import (
+    ListCategoryTimeStatisticDTO,
+    StatisticFilterDTO,
+)
 
 
 class CategoryTimeStatisticSchema(BaseModel):
@@ -22,3 +26,11 @@ class ListCategoryTimeStatisticSchema(BaseModel):
             for category in obj_list.category_list
         ]
         return ListCategoryTimeStatisticSchema(user_uuid=obj_list.user_uuid, category_list=category_list)
+
+
+class StatisticFilterSchema(BaseModel):
+    time_from: int | SkipJsonSchema[None] = None
+    time_to: int | SkipJsonSchema[None] = None
+
+    def to_obj(self) -> StatisticFilterDTO:
+        return StatisticFilterDTO(**self.model_dump(exclude_unset=True))
