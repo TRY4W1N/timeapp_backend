@@ -48,9 +48,13 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
         self,
         category_collection: MongoCollectionType,
         interval_collection: MongoCollectionType,
+        time_day_collection: MongoCollectionType,
+        time_all_collection: MongoCollectionType,
     ) -> None:
         self.category_collection = category_collection
         self.interval_collection = interval_collection
+        self.time_all_collection = time_all_collection
+        self.time_day_collection = time_day_collection
 
     async def create(self, user_uuid: UserId, obj: CategoryCreateDTO) -> CategoryEntity:
         model = CategoryModel(
@@ -112,11 +116,22 @@ class CategoryGatewayMongo(GatewayMongoBase, CategoryGateway):
             raise EntityNotFound(
                 msg=f"Category not deleted for user_uuid={user_uuid} and category_uuid={category_uuid}"
             )
-        interval_fltr = {"user_uuid": user_uuid, "category_uuid": category_uuid}
-        interval_delete_result = await self.interval_collection.delete_many(interval_fltr)
+        fltr = {"user_uuid": user_uuid, "category_uuid": category_uuid}
+        interval_delete_result = await self.interval_collection.delete_many(fltr)
         assert interval_delete_result.acknowledged
+
+        time_day_delete_result = await self.time_day_collection.delete_many(filter=fltr)
+        assert time_day_delete_result.acknowledged
+
+        time_all_delete_result = await self.time_all_collection.delete_many(filter=fltr)
+        assert time_all_delete_result.acknowledged
+
         return CategoryDeleteDTO(
-            user_uuid=user_uuid, category_uuid=category_uuid, interval_count=interval_delete_result.deleted_count
+            user_uuid=user_uuid,
+            category_uuid=category_uuid,
+            interval_count=interval_delete_result.deleted_count,
+            time_day_count=time_day_delete_result.deleted_count,
+            time_all_count=time_all_delete_result.deleted_count,
         )
 
     async def lst(self, user_uuid: UserId, obj: CategoryFilterDTO) -> list[CategoryEntity]:

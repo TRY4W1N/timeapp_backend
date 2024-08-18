@@ -35,3 +35,5 @@ class CategoryDeleteDTO:
     user_uuid: UserId
     category_uuid: CategoryId
     interval_count: int
+    time_day_count: int
+    time_all_count: int

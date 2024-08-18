@@ -34,7 +34,14 @@ class GatewayProvider(Provider):
     async def get_category(self, database: DatabaseMongoType, config: ConfigType) -> AsyncIterable[CategoryGateway]:
         category_collection = database.get_collection(config.MONGODB_COLLECTION_CATEGORY)
         interval_collection = database.get_collection(config.MONGODB_COLLECTION_INTERVAL)
-        gateway = CategoryGatewayMongo(category_collection=category_collection, interval_collection=interval_collection)
+        time_all_collection = database.get_collection(config.MONGODB_COLLECTION_TIMEALL)
+        time_day_collection = database.get_collection(config.MONGODB_COLLECTION_TIMEDAY)
+        gateway = CategoryGatewayMongo(
+            category_collection=category_collection,
+            interval_collection=interval_collection,
+            time_all_collection=time_all_collection,
+            time_day_collection=time_day_collection,
+        )
         yield gateway
 
     @provide(scope=Scope.REQUEST)
