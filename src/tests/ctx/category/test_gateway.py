@@ -46,6 +46,9 @@ async def test_delete(dl: Dataloader, gateway_category: CategoryGateway):
     await dl.category_loader.create(uuid=category_uuid, user_uuid=user_uuid)
     await dl.interval_loader.create(user_uuid=user_uuid, category_uuid=category_uuid)
     await dl.interval_loader.create(user_uuid=user_uuid, category_uuid=category_uuid)
+    await dl.time_day_loader.create(user_uuid=user_uuid, category_uuid=category_uuid)
+    await dl.time_day_loader.create(user_uuid=user_uuid, category_uuid=category_uuid)
+    await dl.time_all_loader.create(user_uuid=user_uuid, category_uuid=category_uuid)
 
     # Act
     delete_result = await gateway_category.delete(user_uuid=user_uuid, category_uuid=category_uuid)
@@ -54,10 +57,17 @@ async def test_delete(dl: Dataloader, gateway_category: CategoryGateway):
     with pytest.raises(Exception):
         await dl.category_loader.get(fltr=dict(uuid=category_uuid))
     interval_list = await dl.interval_loader.get_lst(fltr=dict(user_uuid=user_uuid, category_uuid=category_uuid))
+    fltr = {"user_uuid": user_uuid, "category_uuid": category_uuid}
+    time_all_list = await dl.time_all_loader._get_lst(fltr=fltr)
+    time_day_list = await dl.time_day_loader._get_lst(fltr=fltr)
     assert delete_result.category_uuid == category_uuid
     assert delete_result.user_uuid == user_uuid
     assert delete_result.interval_count == 2
+    assert delete_result.time_day_count == 2
+    assert delete_result.time_all_count == 1
     assert len(interval_list) == 0
+    assert len(time_all_list) == 0
+    assert len(time_day_list) == 0
 
 
 # pytest src/tests/ctx/category/test_gateway.py::test_update -v -s

@@ -94,9 +94,15 @@ class CategoryDeleteSchema(BaseModel):
     user_uuid: str
     category_uuid: str
     interval_count: int
+    time_day_count: int
+    time_all_count: int
 
     @classmethod
     def from_obj(cls, obj: CategoryDeleteDTO) -> "CategoryDeleteSchema":
         return CategoryDeleteSchema(
-            user_uuid=obj.user_uuid, category_uuid=obj.category_uuid, interval_count=obj.interval_count
+            user_uuid=obj.user_uuid,
+            category_uuid=obj.category_uuid,
+            interval_count=obj.interval_count,
+            time_day_count=obj.time_day_count,
+            time_all_count=obj.time_all_count,
         )
